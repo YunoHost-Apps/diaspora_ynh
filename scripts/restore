@@ -69,11 +69,12 @@ chmod 0750 $final_path -R
 chown $app:www-data $final_path
 
 #=================================================
-# INSTALL RVM AND RUBY FOR CURRENT USER
+# INSTALL RVM, RUBY AND NODE FOR CURRENT USER
 #=================================================
 ynh_script_progression --message="Reinstalling rbenv and ruby..." --weight=10
-
 source ./install_ruby
+ynh_script_progression --message="Reinstalling node" --weight=10
+ynh_install_nodejs --nodejs_version=14
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE

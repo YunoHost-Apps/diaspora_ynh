@@ -95,6 +95,12 @@ source $final_path/Experimental_helpers/ynh_install_ruby/ynh_install_ruby
 ynh_remove_ruby
 
 #=================================================
+# REMOVE NODE
+#=================================================
+ynh_script_progression --message="Remove nodejs for this app"
+ynh_remove_nodejs
+
+#=================================================
 # REMOVE APP MAIN DIR
 #=================================================
 if [ $can_remove_home -eq 1 ]; then
