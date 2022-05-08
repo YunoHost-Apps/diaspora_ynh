@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 
 Service de réseau social distribué
 
-**Version incluse :** 0.7.16.0~ynh1
+**Version incluse :** 0.7.17.0~ynh1
 
 
 
