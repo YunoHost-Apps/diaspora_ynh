@@ -170,8 +170,7 @@ yunohost service add $app.target \
 #=================================================
 # SETUP SSOWAT
 #=================================================
-
-
+ynh_permission_update --permission "main" --add visitors
 
 #=================================================
 # CREATE AN ADMIN
