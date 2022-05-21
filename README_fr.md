@@ -13,7 +13,7 @@ Si vous n'avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) pour
 
 Service de réseau social distribué
 
-**Version incluse :** 0.7.16.0~ynh1
+**Version incluse :** 0.7.17.0~ynh1
 
 
 
@@ -22,6 +22,7 @@ Service de réseau social distribué
 - Il n'y a pas d'intégration LDAP pour le moment.
 - L'installation est très longue, en particulier l'étape de build du frontend.
 - le projet amont ne supporte pas les changements d'url, ainsi l'application yunohost ne supporte pas non plus cette action.
+- Le groupe visiteur doit avoir la permission "diaspora.main". En d'autres termes, diaspora est supposé être une application publique. Ne changez cela que si vous savez ce que vous faîtes ! 
 
 ## Documentations et ressources
 

@@ -17,7 +17,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 Distributed social networking service
 
-**Shipped version:** 0.7.16.0~ynh1
+**Shipped version:** 0.7.17.0~ynh1
 
 
 
@@ -26,6 +26,7 @@ Distributed social networking service
 - There is currently no LDAP integration
 - the installation is very long, especially the frontend building step
 - As upstream doesn't support it, there is no possibility to change the endpoint/url of diaspora\*. Please choose it carefully!
+- The main permission should be granted to "visitors". In other term, diaspora is intented to be a public application. Only deviate from that if you know what you are doing!
 
 ## Documentation and resources
 
