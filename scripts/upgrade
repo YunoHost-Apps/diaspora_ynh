@@ -59,16 +59,24 @@ ynh_script_progression --message="Installing dependencies..."
 ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
 
 #=================================================
+# INSTALL NODE
+#=================================================
+ynh_script_progression --message="Install node"
+ynh_install_nodejs --nodejs_version=14
+
+#=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
 # migrate from rvm to rbenv
-ynh_script_progression --message="Remove rvm..."
+ynh_script_progression --message="Remove rvm if needed..."
 if [ -e "$final_path/.rvm" ]; then
   sudo -u $app --login << EOF
 rvm implode --force
 EOF
 fi
+ynh_script_progression --message="Install ruby"
 source ./install_ruby
+
 # remove old gpg keys for rvm
 ynh_script_progression --message="Remove old rvm keys..."
 if gpg --list-keys mpapis@gmail.com >/dev/null 2>&1; then

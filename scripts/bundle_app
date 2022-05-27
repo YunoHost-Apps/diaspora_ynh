@@ -9,7 +9,9 @@ bin/bundle install --full-index --with=postgresql
 EOF
 # for some reason rake logs a lot in stderr (tried --quiet, didn't change anything)
 # redirecting it to stdout to have a saner log on yunohost side
-sudo -u $app --login << EOF
+sudo -u $app /bin/bash -l << EOF
+source /usr/share/yunohost/helpers
+ynh_use_nodejs
 cd diaspora
 RAILS_ENV=production bundle exec rake db:migrate 2>&1
 EOF
@@ -18,7 +20,9 @@ EOF
 # ASSETS PRECOMPILATION
 #=================================================
 
-sudo -u $app --login << EOF
+sudo -u $app /bin/bash << EOF
+source /usr/share/yunohost/helpers
+ynh_use_nodejs
 cd diaspora
 RAILS_ENV=production bin/rake assets:precompile 2>&1
 EOF
