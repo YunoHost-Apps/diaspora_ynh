@@ -54,8 +54,8 @@ ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
 # BACKUP SYSTEMD
 #=================================================
 
-ynh_backup --src_path="/etc/systemd/system/$app_web.service"
-ynh_backup --src_path="/etc/systemd/system/$app_sidekiq.service"
+ynh_backup --src_path="/etc/systemd/system/${app}_web.service"
+ynh_backup --src_path="/etc/systemd/system/${app}_sidekiq.service"
 
 #=================================================
 # BACKUP THE POSTGRESQL DATABASE
