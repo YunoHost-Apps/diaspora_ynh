@@ -99,17 +99,30 @@ pushd $final_path/live
   ynh_use_nodejs
   ynh_gem install bundler:$bundler_version
   ynh_exec_as $app $ynh_ruby_load_path $ld_preload script/configure_bundler
-  ynh_exec_as $app $ynh_ruby_load_path $ld_preload bin/bundle install --full-index --with=postgresql
 popd
+
+ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
+ynh_package_autoremove
 
 #=================================================
 # RESTORE SYSTEMD
 #=================================================
 ynh_script_progression --message="Restoring the systemd configuration..."
 
-ynh_restore_file --origin_path="/etc/systemd/system/$app-web.service"
-ynh_restore_file --origin_path="/etc/systemd/system/$app-sidekiq.service"
-ynh_restore_file --origin_path="/etc/systemd/system/$app-streaming.service"
+ynh_restore_file --origin_path="/etc/systemd/system/${app}_web.service"
+ynh_restore_file --origin_path="/etc/systemd/system/${app}_sidekiq.service"
+
+# tmp files
+install -T --mode=0644 -v ../conf/diaspora.tmpfiles.d /etc/tmpfiles.d/${app}.conf
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/tmpfiles.d/${app}.conf
+
+# target unit
+install -T --mode=0644 -v ../conf/diaspora.target /etc/systemd/system/${app}.target
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/systemd/system/${app}.target
+
+# reload, create, enable and start stuff
+systemctl daemon-reload
+systemd-tmpfiles --create
 systemctl enable "$app_web" "$app_sidekiq" "$app.target" --quiet
 
 #=================================================
