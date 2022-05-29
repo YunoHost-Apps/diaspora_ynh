@@ -85,6 +85,14 @@ if gpg --list-keys piotr.kuczynski@gmail.com >/dev/null 2>&1; then
   ynh_secure_remove "$final_path/piotr.kuczynski@gmail.com.pgp"
 fi
 
+if [ -d "$final_path/live" ]; then
+  ynh_delete_file_checksum --file="$final_path/diaspora/config/diaspora.yml"
+  ynh_delete_file_checksum --file="$final_path/diaspora/config/database.yml"
+  mv "$final_path/diaspora" "$final_path/live"
+  ynh_store_file_checksum --file="$final_path/live/config/diaspora.yml"
+  ynh_store_file_checksum --file="$final_path/live/config/database.yml"
+fi
+
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
@@ -102,7 +110,7 @@ then
 	ynh_script_progression --message="Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path/live"
+	ynh_setup_source --dest_dir="$final_path/live" --keep="live/config/diaspora.yml live/config/database.yml"
 fi
 
 chmod 750 "$final_path"
@@ -125,7 +133,6 @@ ynh_script_progression --message="Upgrading dependencies..."
 ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies $build_pkg_dependencies
 ynh_exec_warn_less ynh_install_ruby --ruby_version=$ruby_version
 ynh_exec_warn_less ynh_install_nodejs --nodejs_version=$nodejs_version
-
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -196,14 +203,8 @@ yunohost service add $app.target \
 ynh_script_progression --message="Starting a systemd service..."
 
 systemctl restart ${app}.target
-ynh_systemd_action --service_name=${app}_web.service \
-                   --action=restart\
-                   --log_path="$final_path/live/log/production.log" \
-                   --line_match="successfully configured the federation library"
-ynh_systemd_action --service_name=${app}_sidekiq.service \
-                   --action=restart\
-                   --log_path="systemd" \
-                   --line_match="Running in ruby"
+ynh_systemd_action --service_name=${app}_web.service --action=restart --log_path="$final_path/live/log/production.log" --line_match="successfully configured the federation library"
+ynh_systemd_action --service_name=${app}_sidekiq.service --action=restart --log_path="systemd" --line_match="Running in ruby"
 
 #=================================================
 # RELOAD NGINX
