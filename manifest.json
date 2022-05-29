@@ -25,11 +25,10 @@
     },
     "multi_instance": true,
     "services": [
-        "nginx",
-        "postgresql"
+        "nginx"
     ],
     "arguments": {
-        "install" : [
+        "install": [
             {
                 "name": "domain",
                 "type": "domain"
@@ -39,7 +38,7 @@
                 "type": "user"
             },
             {
-                "name": "admin_password",
+                "name": "password",
                 "type": "password",
                 "ask": {
                     "en": "Admin password. Must contain at least 10 characters, one lowercase letter, one uppercase letter, one number, and one symbol (e.g. '~!@#$%^&*()').",

@@ -6,8 +6,8 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-# IMPORT GENERIC HELPERS
 source _common.sh
+source ynh_install_ruby__2
 source /usr/share/yunohost/helpers
 
 #=================================================
@@ -17,56 +17,53 @@ ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
-# Retrieve arguments
-domain=$(ynh_app_setting_get --app $app --key domain)
-admin=$(ynh_app_setting_get --app $app --key admin)
-final_path=$(ynh_app_setting_get --app $app --key final_path)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+admin=$(ynh_app_setting_get --app=$app --key=admin)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
-ynh_clean_setup() {
-  ynh_clean_check_starting
+#=================================================
+# CHECK VERSION
+#=================================================
+ynh_script_progression --message="Checking version..."
+
+upgrade_type=$(ynh_check_app_version_changed)
+
+#=================================================
+# BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
+#=================================================
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
+
+# Backup the current version of the app
+ynh_backup_before_upgrade
+ynh_clean_setup () {
+	ynh_clean_check_starting
+	# Restore it if the upgrade fails
+	ynh_restore_upgradebackup
 }
+# Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
 #=================================================
-# Migrate legacy permissions to new system
+# STANDARD UPGRADE STEPS
 #=================================================
-if ynh_legacy_permissions_exists
-then
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Stopping a systemd service..."
+
+systemctl stop $app.target
+
+#=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+ynh_script_progression --message="Ensuring downward compatibility..."
+
+# Cleaning legacy permissions
+if ynh_legacy_permissions_exists; then
 	ynh_legacy_permissions_delete_all
 
 	ynh_app_setting_delete --app=$app --key=is_public
 fi
 
-#=================================================
-# Check upgrade type
-#=================================================
-ynh_script_progression --message="Check upgrade type..."
-
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
-# Stop services
-#=================================================
-ynh_script_progression --message="Stop services..."
-
-systemctl stop $app.target 
-
-#=================================================
-# INSTALL DEPENDENCIES
-#=================================================
-ynh_script_progression --message="Installing dependencies..."
-
-ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
-
-#=================================================
-# INSTALL NODE
-#=================================================
-ynh_script_progression --message="Install node"
-ynh_install_nodejs --nodejs_version=14
-
-#=================================================
-# ENSURE DOWNWARD COMPATIBILITY
-#=================================================
 # migrate from rvm to rbenv
 ynh_script_progression --message="Remove rvm if needed..."
 if [ -e "$final_path/.rvm" ]; then
@@ -74,8 +71,6 @@ if [ -e "$final_path/.rvm" ]; then
 rvm implode --force
 EOF
 fi
-ynh_script_progression --message="Install ruby"
-source ./install_ruby
 
 # remove old gpg keys for rvm
 ynh_script_progression --message="Remove old rvm keys..."
@@ -90,47 +85,135 @@ if gpg --list-keys piotr.kuczynski@gmail.com >/dev/null 2>&1; then
   ynh_secure_remove "$final_path/piotr.kuczynski@gmail.com.pgp"
 fi
 
-if [ "$upgrade_type" == "UPGRADE_APP" ];
-then
-  upgrade_message="Upgrading this app and upstream to $current_tag"
-else
-  upgrade_message="Shallow upgrade of yunohost app"
-fi
-ynh_script_progression --message=$upgrade_message
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Making sure dedicated system user exists..."
+
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app --home_dir=$final_path
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-  # revert local change to .ruby-version
-  pushd $final_path/diaspora
-  git checkout -- .ruby-version
-  git fetch
-  git checkout $current_tag
-  popd
-  source ./bundle_app
+	ynh_script_progression --message="Upgrading source files..."
+
+	# Download, check integrity, uncompress and patch the source from app.src
+	ynh_setup_source --dest_dir="$final_path/live"
 fi
 
-#=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
-#=================================================
-yunohost service add $app.target \
-  --log $final_path/diaspora/log/production.log \
-        $final_path/diaspora/log/unicorn-stderr.log\
-        $final_path/diaspora/log/unicorn-stdout.log\
-        $final_path/diaspora/log/sidekiq.log\
-  --description "Diaspora service (unicorn web and sidekiq)"
-
-#=================================================
-# restart services
-#=================================================
-ynh_script_progression --message="Recreate and start services..."
-
-source ./create_services
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-# Create a dedicated nginx config
-ynh_script_progression --message="configure nginx..." --weight=1
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
 
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
+#=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Upgrading dependencies..."
 
+ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies $build_pkg_dependencies
+ynh_exec_warn_less ynh_install_ruby --ruby_version=$ruby_version
+ynh_exec_warn_less ynh_install_nodejs --nodejs_version=$nodejs_version
+
+
+#=================================================
+# SPECIFIC UPGRADE
+#=================================================
+# BUILD APP
+#=================================================
+ynh_script_progression --message="Building app..." --weight=40
+
+pushd $final_path/live
+  ynh_use_ruby
+  ynh_use_nodejs
+  ynh_gem install bundler:$bundler_version
+  ynh_exec_as $app $ynh_ruby_load_path $ld_preload script/configure_bundler
+  ynh_exec_as $app $ynh_ruby_load_path $ld_preload bin/bundle install --full-index --with=postgresql
+  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rake db:migrate 2>&1
+  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/rake assets:precompile 2>&1
+popd
+
+ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
+ynh_package_autoremove
+
+#=================================================
+# UPDATE A CONFIG FILE
+#=================================================
+ynh_script_progression --message="Updating a configuration file..." --weight=1
+
+ynh_add_config --template="../conf/diaspora.yml" --destination="$final_path/live/config/diaspora.yml"
+ynh_add_config --template="../conf/database.yml" --destination="$final_path/live/config/database.yml"
+
+#=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_script_progression --message="Upgrading systemd configuration..." --weight=1
+
+ynh_add_systemd_config --service="${app}_sidekiq" --template="diaspora_sidekiq.service"
+ynh_add_systemd_config --service="${app}_web" --template="diaspora_web.service"
+
+# tmp files
+install -T --mode=0644 -v ../conf/diaspora.tmpfiles.d /etc/tmpfiles.d/${app}.conf
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/tmpfiles.d/${app}.conf
+
+# target unit
+install -T --mode=0644 -v ../conf/diaspora.target /etc/systemd/system/${app}.target
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/systemd/system/${app}.target
+
+# reload, create, enable and start stuff
+systemctl daemon-reload
+systemd-tmpfiles --create
+systemctl enable ${app}.target --quiet
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# INTEGRATE SERVICE IN YUNOHOST
+#=================================================
+ynh_script_progression --message="Integrating service in YunoHost..."
+
+yunohost service add $app.target \
+  --log $final_path/live/log/production.log \
+        $final_path/live/log/unicorn-stderr.log\
+        $final_path/live/log/unicorn-stdout.log\
+        $final_path/live/log/sidekiq.log\
+  --description "Diaspora service (unicorn web and sidekiq)"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Starting a systemd service..."
+
+systemctl restart ${app}.target
+ynh_systemd_action --service_name=${app}_web.service \
+                   --action=restart\
+                   --log_path="$final_path/live/log/production.log" \
+                   --line_match="successfully configured the federation library"
+ynh_systemd_action --service_name=${app}_sidekiq.service \
+                   --action=restart\
+                   --log_path="systemd" \
+                   --line_match="Running in ruby"
+
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_script_progression --message="Reloading NGINX web server..."
+
+ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Upgrade of $app completed"

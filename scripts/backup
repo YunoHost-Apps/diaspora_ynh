@@ -6,12 +6,17 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
-#Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
+source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
 # MANAGE SCRIPT FAILURE
 #=================================================
+
+ynh_clean_setup () {
+	true
+}
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
@@ -23,42 +28,44 @@ ynh_print_info --message="Loading installation settings..."
 app=$YNH_APP_INSTANCE_NAME
 
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+db_name=$(ynh_app_setting_get --app=$app --key=db_name)
 
 #=================================================
-# STANDARD BACKUP STEPS
+# DECLARE DATA AND CONF FILES TO BACKUP
 #=================================================
-# clean folder
-ynh_secure_remove --file="$final_path/backup"
-mkdir -p $final_path/backup
+ynh_print_info --message="Declaring files to be backed up..."
 
 #=================================================
-# BACKUP DIASPORA DATABASE
-#=================================================
-ynh_print_info --message="Backup Diaspora DB..."
-
-db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
-dump_file="$final_path/backup/$app.dump"
-pg_dump -d "dbname=$app user=$app password=$db_pass host=localhost" -Fc -f $dump_file
-ynh_backup --src_path="$dump_file"
-
-#=================================================
-# BACKUP DIASPORA UPLOADS
+# BACKUP THE APP MAIN DIR
 #=================================================
 
-if [ -x $final_path/diaspora/public/uploads ]; then
-  ynh_backup --src_path="$final_path/diaspora/public/uploads"
-else
-  echo "uploads folder does not exist. Skipping."
-fi
+ynh_backup --src_path="$final_path"
 
 #=================================================
-# BACKUP CONF FILES
+# BACKUP THE NGINX CONFIGURATION
 #=================================================
 
-ynh_backup --src_path="$final_path/diaspora/config/database.yml"
-ynh_backup --src_path="$final_path/diaspora/config/diaspora.yml"
+ynh_backup --src_path="/etc/nginx/conf.d/$domain.d/$app.conf"
+
+#=================================================
+# SPECIFIC BACKUP
+#=================================================
+# BACKUP SYSTEMD
+#=================================================
+
+ynh_backup --src_path="/etc/systemd/system/$app_web.service"
+ynh_backup --src_path="/etc/systemd/system/$app_sidekiq.service"
+
+#=================================================
+# BACKUP THE POSTGRESQL DATABASE
+#=================================================
+ynh_print_info --message="Backing up the PostgreSQL database..."
+
+ynh_psql_dump_db --database="$db_name" > db.sql
 
 #=================================================
 # END OF SCRIPT
 #=================================================
+
 ynh_print_info --message="Backup script completed for $app. (YunoHost will then actually copy those files to the archive)."

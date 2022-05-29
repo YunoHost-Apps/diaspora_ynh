@@ -2,8 +2,8 @@ postgresql: &postgresql
   adapter: postgresql
   host: "localhost"
   port: 5432
-  username: "{{ app }}"
-  password: "{{ db_pass }}"
+  username: "__DB_USER__"
+  password: "__DB_PWD__"
   encoding: unicode
 
 mysql: &mysql
@@ -42,7 +42,7 @@ development:
   database: diaspora_development
 production:
   <<: *combined
-  database: {{ app }}
+  database: __DB_NAME__
 test:
   <<: *combined
   database: diaspora_test
