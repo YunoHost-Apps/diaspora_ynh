@@ -9,7 +9,7 @@
 		setup_root=1
 		setup_nourl=0
 		upgrade=1
-		upgrade=1	from_commit=0.7.16.0-ynh1
+		upgrade=1	from_commit=ee7996edba39c1978b0986aabc89042f949e335f
 		backup_restore=1
 		multi_instance=1
 		port_already_use=0
@@ -18,6 +18,6 @@
 Email=
 Notification=none
 ;;; Upgrade options
-	; commit=CommitHash
-		name=Name and date of the commit.
-		manifest_arg=domain=DOMAIN&path=PATH&admin=USER&language=fr&is_public=1&password=pass&port=666&
+	; commit=ee7996edba39c1978b0986aabc89042f949e335f
+		name=0.7.16.0-ynh1.
+		manifest_arg=domain=DOMAIN&admin=USER&admin_password=pass
