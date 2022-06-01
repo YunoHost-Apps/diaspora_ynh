@@ -18,8 +18,14 @@ ynh_script_progression --message="Loading installation settings..."
 app=$YNH_APP_INSTANCE_NAME
 
 domain=$(ynh_app_setting_get --app=$app --key=domain)
+path_url=$(ynh_app_setting_get --app=$app --key=path)
 admin=$(ynh_app_setting_get --app=$app --key=admin)
 final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+db_user=$db_name
+db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
+admin=$(ynh_app_setting_get --app=$app --key=admin)
+admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
 
 #=================================================
 # CHECK VERSION
@@ -85,10 +91,10 @@ if gpg --list-keys piotr.kuczynski@gmail.com >/dev/null 2>&1; then
   ynh_secure_remove "$final_path/piotr.kuczynski@gmail.com.pgp"
 fi
 
-if [ -d "$final_path/live" ]; then
-  ynh_delete_file_checksum --file="$final_path/diaspora/config/diaspora.yml"
-  ynh_delete_file_checksum --file="$final_path/diaspora/config/database.yml"
-  mv "$final_path/diaspora" "$final_path/live"
+if ! [ -d "$final_path/live" ]; then
+  ynh_delete_file_checksum --file="$final_path/config/diaspora.yml"
+  ynh_delete_file_checksum --file="$final_path/config/database.yml"
+  mv "$final_path" "$final_path/live"
   ynh_store_file_checksum --file="$final_path/live/config/diaspora.yml"
   ynh_store_file_checksum --file="$final_path/live/config/database.yml"
 fi
