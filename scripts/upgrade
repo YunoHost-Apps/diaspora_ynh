@@ -94,9 +94,16 @@ fi
 if ! [ -d "$final_path/live" ]; then
   ynh_delete_file_checksum --file="$final_path/config/diaspora.yml"
   ynh_delete_file_checksum --file="$final_path/config/database.yml"
-  mv "$final_path" "$final_path/live"
+  tmpdir="$(mktemp -d)"
+  mv "$final_path" "$tmpdir/live"
+  mkdir -p "$final_path"
+  mv "$tmpdir/live" "$final_path/live"
+  ynh_secure_remove --file="$tmpdir"
   ynh_store_file_checksum --file="$final_path/live/config/diaspora.yml"
   ynh_store_file_checksum --file="$final_path/live/config/database.yml"
+  chmod 750 "$final_path"
+  chmod -R o-rwx "$final_path"
+  chown -R $app:www-data "$final_path"
 fi
 
 #=================================================
@@ -105,7 +112,7 @@ fi
 ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir=$final_path
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
