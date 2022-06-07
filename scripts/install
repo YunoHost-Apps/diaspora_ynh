@@ -123,8 +123,8 @@ pushd $final_path/live
   ynh_gem install bundler:$bundler_version
   ynh_exec_as $app $ynh_ruby_load_path $ld_preload script/configure_bundler
   ynh_exec_as $app $ynh_ruby_load_path $ld_preload bin/bundle install --full-index --with=postgresql
-  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rake db:migrate 2>&1
-  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/rake assets:precompile 2>&1
+  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rake db:migrate
+  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/rake assets:precompile
   ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rails console << END
 user = User.build({username: '$admin', email: '$admin_mail', password: '$password', password_confirmation: '$password' })
 user.save
