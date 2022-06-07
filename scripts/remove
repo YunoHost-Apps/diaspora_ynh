@@ -42,8 +42,8 @@ ynh_script_progression --message="Stopping and removing the systemd service..."
 
 systemctl stop ${app}.target
 systemctl disable ${app}.target --quiet
-ynh_remove_systemd_config --service="$app_web"
-ynh_remove_systemd_config --service="$app_sidekiq"
+ynh_remove_systemd_config --service="${app}_web"
+ynh_remove_systemd_config --service="${app}_sidekiq"
 ynh_secure_remove --file="/etc/tmpfiles.d/${app}.conf"
 ynh_secure_remove --file="/etc/systemd/system/${app}.target"
 ynh_secure_remove --file="/run/${app}"
