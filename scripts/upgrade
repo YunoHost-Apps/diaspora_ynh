@@ -118,13 +118,10 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
-then
-	ynh_script_progression --message="Upgrading source files..."
+ynh_script_progression --message="Upgrading source files..."
 
-	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path/live" --keep="live/config/diaspora.yml live/config/database.yml"
-fi
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source --dest_dir="$final_path/live" --keep="live/config/diaspora.yml live/config/database.yml"
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
@@ -160,8 +157,8 @@ pushd $final_path/live
   ynh_gem install bundler:$bundler_version
   ynh_exec_as $app $ynh_ruby_load_path $ld_preload script/configure_bundler
   ynh_exec_as $app $ynh_ruby_load_path $ld_preload bin/bundle install --full-index --with=postgresql
-  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rake db:migrate 2>&1
-  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/rake assets:precompile 2>&1
+  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rake db:migrate
+  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/rake assets:precompile
 popd
 
 ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
