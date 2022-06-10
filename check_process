@@ -9,7 +9,10 @@
 		setup_root=1
 		setup_nourl=0
 		upgrade=1
+		# 0.7.16.0-ynh1
 		upgrade=1	from_commit=ee7996edba39c1978b0986aabc89042f949e335f
+		# 0.7.17.0~ynh1
+		upgrade=1	from_commit=f6bc22257c54478420ed42480f346f25601ee87a
 		backup_restore=1
 		multi_instance=1
 		port_already_use=0

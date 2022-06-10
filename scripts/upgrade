@@ -42,7 +42,7 @@ ynh_script_progression --message="Backing up the app before upgrading (may take 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-	ynh_clean_check_starting
+  ynh_clean_check_starting
 	# Restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
@@ -92,13 +92,9 @@ if gpg --list-keys piotr.kuczynski@gmail.com >/dev/null 2>&1; then
 fi
 
 if ! [ -d "$final_path/live" ]; then
-  ynh_delete_file_checksum --file="$final_path/config/diaspora.yml"
-  ynh_delete_file_checksum --file="$final_path/config/database.yml"
-  tmpdir="$(mktemp -d)"
-  mv "$final_path" "$tmpdir/live"
-  mkdir -p "$final_path"
-  mv "$tmpdir/live" "$final_path/live"
-  ynh_secure_remove --file="$tmpdir"
+  ynh_delete_file_checksum --file="$final_path/diaspora/config/diaspora.yml"
+  ynh_delete_file_checksum --file="$final_path/diaspora/config/database.yml"
+  mv "$final_path/diaspora" "$final_path/live"
   ynh_store_file_checksum --file="$final_path/live/config/diaspora.yml"
   ynh_store_file_checksum --file="$final_path/live/config/database.yml"
   chmod 750 "$final_path"
@@ -117,11 +113,10 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-
 ynh_script_progression --message="Upgrading source files..."
 
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source --dest_dir="$final_path/live" --keep="live/config/diaspora.yml live/config/database.yml"
+ynh_setup_source --dest_dir="$final_path/live" --keep="config/diaspora.yml config/database.yml"
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
