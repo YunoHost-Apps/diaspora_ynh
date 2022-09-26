@@ -10,7 +10,7 @@ build_pkg_dependencies="libffi-dev libgdbm-dev libncurses5-dev libyaml-dev pkg-c
 
 ruby_version=2.6.6
 nodejs_version=14
-bundler_version=1.17.3
+bundler_version=2.1.4
 
 # Workaround for Mastodon on Bullseye
 # See https://github.com/mastodon/mastodon/issues/15751#issuecomment-873594463
