@@ -17,7 +17,13 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 Distributed social networking service
 
-**Shipped version:** 0.7.17.0~ynh1
+**Shipped version:** 0.7.18.1~ynh1
+
+
+## Screenshots
+
+![Screenshot of Diaspora](./doc/screenshots/Diaspora_latest.png)
+
 ## Disclaimers / important information
 
 - There is currently no LDAP integration
