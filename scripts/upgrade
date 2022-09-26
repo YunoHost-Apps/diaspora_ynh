@@ -13,7 +13,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..."
+ynh_script_progression --message="Loading installation settings..." --weight=1
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -30,19 +30,18 @@ admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
 #=================================================
 # CHECK VERSION
 #=================================================
-ynh_script_progression --message="Checking version..."
+ynh_script_progression --message="Checking version..." --weight=1
 
 upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=1
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-  ynh_clean_check_starting
 	# Restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
@@ -54,14 +53,14 @@ ynh_abort_if_errors
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Stopping a systemd service..."
+ynh_script_progression --message="Stopping a systemd service..." --weight=1
 
 systemctl stop $app.target
 
 #=================================================
 # ENSURE DOWNWARD COMPATIBILITY
 #=================================================
-ynh_script_progression --message="Ensuring downward compatibility..."
+ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 # Cleaning legacy permissions
 if ynh_legacy_permissions_exists; then
@@ -71,7 +70,7 @@ if ynh_legacy_permissions_exists; then
 fi
 
 # migrate from rvm to rbenv
-ynh_script_progression --message="Remove rvm if needed..."
+ynh_script_progression --message="Remove rvm if needed..." --weight=1
 if [ -e "$final_path/.rvm" ]; then
   sudo -u $app --login << EOF
 rvm implode --force
@@ -79,7 +78,7 @@ EOF
 fi
 
 # remove old gpg keys for rvm
-ynh_script_progression --message="Remove old rvm keys..."
+ynh_script_progression --message="Remove old rvm keys..." --weight=1
 if gpg --list-keys mpapis@gmail.com >/dev/null 2>&1; then
   ynh_print_info --message="Found mpapis key: deleting"
   sudo -u $app gpg --delete-keys mpapis@gmail.com
@@ -105,7 +104,7 @@ fi
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
+ynh_script_progression --message="Making sure dedicated system user exists..." --weight=1
 
 # Create a dedicated user (if not existing)
 ynh_system_user_create --username=$app --home_dir="$final_path"
@@ -113,31 +112,35 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Upgrading source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source --dest_dir="$final_path/live" --keep="config/diaspora.yml config/database.yml"
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+	ynh_script_progression --message="Upgrading source files..." --weight=1
+
+	# Download, check integrity, uncompress and patch the source from app.src
+	ynh_setup_source --dest_dir="$final_path/live" --keep="config/diaspora.yml config/database.yml"
+fi
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
 chown -R $app:www-data "$final_path"
 
 #=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading NGINX web server configuration..."
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
-
-#=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Upgrading dependencies..."
+ynh_script_progression --message="Upgrading dependencies..." --weight=1
 
 ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies $build_pkg_dependencies
 ynh_exec_warn_less ynh_install_ruby --ruby_version=$ruby_version
 ynh_exec_warn_less ynh_install_nodejs --nodejs_version=$nodejs_version
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Upgrading NGINX web server configuration..." --weight=1
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -193,7 +196,7 @@ systemctl enable ${app}.target --quiet
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
+ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
 
 yunohost service add $app.target \
   --log $final_path/live/log/production.log \
@@ -205,7 +208,7 @@ yunohost service add $app.target \
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..." --weight=1
 
 systemctl restart ${app}.target
 ynh_systemd_action --service_name=${app}_web.service --action=restart --log_path="$final_path/live/log/production.log" --line_match="successfully configured the federation library"
@@ -214,7 +217,7 @@ ynh_systemd_action --service_name=${app}_sidekiq.service --action=restart --log_
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+ynh_script_progression --message="Reloading NGINX web server..." --weight=1
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -222,4 +225,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed"
+ynh_script_progression --message="Upgrade of $app completed" --last

@@ -15,7 +15,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_clean_setup () {
-	ynh_clean_check_starting
+	true
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -29,9 +29,9 @@ path_url="/"
 admin=$YNH_APP_ARG_ADMIN
 password=$YNH_APP_ARG_PASSWORD
 
-admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
-
 app=$YNH_APP_INSTANCE_NAME
+
+admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
@@ -86,7 +86,7 @@ db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Setting up source files..."
+ynh_script_progression --message="Setting up source files..." --weight=1
 
 ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
@@ -105,12 +105,19 @@ ynh_script_progression --message="Configuring NGINX web server..." --weight=1
 ynh_add_nginx_config
 
 #=================================================
+# SPECIFIC SETUP
+#=================================================
 # ADD A CONFIGURATION
 #=================================================
 ynh_script_progression --message="Adding a configuration file..." --weight=1
 
 ynh_add_config --template="../conf/diaspora.yml" --destination="$final_path/live/config/diaspora.yml"
+chmod 400 "$final_path/live/config/diaspora.yml"
+chown $app:$app "$final_path/live/config/diaspora.yml"
+
 ynh_add_config --template="../conf/database.yml" --destination="$final_path/live/config/database.yml"
+chmod 400 "$final_path/live/config/database.yml"
+chown $app:$app "$final_path/live/config/database.yml"
 
 #=================================================
 # BUILD APP
@@ -162,7 +169,7 @@ systemctl enable ${app}.target --quiet
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
+ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
 
 yunohost service add $app.target \
   --log $final_path/live/log/production.log \
@@ -174,7 +181,7 @@ yunohost service add $app.target \
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..." --weight=1
 
 systemctl restart ${app}.target
 ynh_systemd_action --service_name=${app}_web.service --action=restart --log_path="$final_path/live/log/production.log" --line_match="successfully configured the federation library"
@@ -183,14 +190,14 @@ ynh_systemd_action --service_name=${app}_sidekiq.service --action=restart --log_
 #=================================================
 # SETUP SSOWAT
 #=================================================
-ynh_script_progression --message="Configuring permissions..."
+ynh_script_progression --message="Configuring permissions..." --weight=1
 
 ynh_permission_update --permission="main" --add="visitors"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+ynh_script_progression --message="Reloading NGINX web server..." --weight=1
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -198,4 +205,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed"
+ynh_script_progression --message="Installation of $app completed" --last

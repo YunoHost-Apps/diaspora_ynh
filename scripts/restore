@@ -16,7 +16,7 @@ source /usr/share/yunohost/helpers
 #=================================================
 
 ynh_clean_setup () {
-	ynh_clean_check_starting
+	true
 }
 # Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
@@ -24,7 +24,7 @@ ynh_abort_if_errors
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..."
+ynh_script_progression --message="Loading installation settings..." --weight=1
 
 app=$YNH_APP_INSTANCE_NAME
 
@@ -36,7 +36,7 @@ db_user=$db_name
 #=================================================
 # CHECK IF THE APP CAN BE RESTORED
 #=================================================
-ynh_script_progression --message="Validating restoration parameters..."
+ynh_script_progression --message="Validating restoration parameters..." --weight=1
 
 test ! -d $final_path \
 	|| ynh_die --message="There is already a directory: $final_path "
@@ -44,16 +44,9 @@ test ! -d $final_path \
 #=================================================
 # STANDARD RESTORATION STEPS
 #=================================================
-# RESTORE THE NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Restoring the NGINX web server configuration..."
-
-ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
-
-#=================================================
 # RECREATE THE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Recreating the dedicated system user..."
+ynh_script_progression --message="Recreating the dedicated system user..." --weight=1
 
 # Create the dedicated user (if not existing)
 ynh_system_user_create --username=$app --home_dir="$final_path"
@@ -61,7 +54,7 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 #=================================================
 # RESTORE THE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Restoring the app main directory..."
+ynh_script_progression --message="Restoring the app main directory..." --weight=1
 
 ynh_restore_file --origin_path="$final_path"
 
@@ -81,9 +74,16 @@ ynh_exec_warn_less ynh_install_ruby --ruby_version=$ruby_version
 ynh_exec_warn_less ynh_install_nodejs --nodejs_version=$nodejs_version
 
 #=================================================
+# RESTORE THE NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Restoring the NGINX web server configuration..." --weight=1
+
+ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
+
+#=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Restoring the PostgreSQL database..."
+ynh_script_progression --message="Restoring the PostgreSQL database..." --weight=1
 
 ynh_psql_test_if_first_run
 db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
@@ -108,7 +108,7 @@ ynh_package_autoremove
 #=================================================
 # RESTORE SYSTEMD
 #=================================================
-ynh_script_progression --message="Restoring the systemd configuration..."
+ynh_script_progression --message="Restoring the systemd configuration..." --weight=1
 
 ynh_restore_file --origin_path="/etc/systemd/system/${app}_web.service"
 ynh_restore_file --origin_path="/etc/systemd/system/${app}_sidekiq.service"
@@ -129,7 +129,7 @@ systemctl enable "${app}_web" "${app}_sidekiq" "$app.target" --quiet
 #=================================================
 # INTEGRATE SERVICE IN YUNOHOST
 #=================================================
-ynh_script_progression --message="Integrating service in YunoHost..."
+ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
 
 yunohost service add $app.target \
   --log $final_path/live/log/production.log \
@@ -141,7 +141,7 @@ yunohost service add $app.target \
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..."
+ynh_script_progression --message="Starting a systemd service..." --weight=1
 
 systemctl restart ${app}.target
 ynh_systemd_action --service_name=${app}_web.service --action=restart --log_path="$final_path/live/log/production.log" --line_match="successfully configured the federation library"
@@ -152,7 +152,7 @@ ynh_systemd_action --service_name=${app}_sidekiq.service --action=restart --log_
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+ynh_script_progression --message="Reloading NGINX web server..." --weight=1
 
 ynh_systemd_action --service_name=nginx --action=reload
 
@@ -160,4 +160,4 @@ ynh_systemd_action --service_name=nginx --action=reload
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Restoration completed for $app"
+ynh_script_progression --message="Restoration completed for $app" --last
