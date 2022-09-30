@@ -8,7 +8,7 @@
 pkg_dependencies="cmake imagemagick ghostscript curl libmagickwand-dev git libpq-dev redis-server postgresql"
 build_pkg_dependencies="libffi-dev libgdbm-dev libncurses5-dev libyaml-dev pkg-config sqlite3 libgmp-dev libssl-dev"
 
-ruby_version=2.6.6
+ruby_version=2.7
 nodejs_version=14
 bundler_version=2.1.4
 

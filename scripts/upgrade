@@ -42,7 +42,7 @@ ynh_script_progression --message="Backing up the app before upgrading (may take 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-	# Restore it if the upgrade fails
+  # Restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
@@ -101,6 +101,8 @@ if ! [ -d "$final_path/live" ]; then
   chown -R $app:www-data "$final_path"
 fi
 
+ynh_secure_remove "$final_path/Experimental_helpers"
+
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
@@ -112,10 +114,23 @@ ynh_system_user_create --username=$app --home_dir="$final_path"
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Upgrading source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source --dest_dir="$final_path/live" --keep="config/diaspora.yml config/database.yml"
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+	ynh_script_progression --message="Upgrading source files..." --weight=1
+
+	tmpdir="$(mktemp -d)"
+	cp "$final_path/live/config/diaspora.yml" "$tmpdir/diaspora.yml"
+	cp "$final_path/live/config/database.yml" "$tmpdir/database.yml"
+	ynh_secure_remove --file="$final_path/live"
+
+	# Download, check integrity, uncompress and patch the source from app.src
+	ynh_setup_source --dest_dir="$final_path/live" --keep="config/diaspora.yml config/database.yml"
+
+	cp "$tmpdir/diaspora.yml" "$final_path/live/config/diaspora.yml"
+	cp "$tmpdir/database.yml" "$final_path/live/config/database.yml"
+	ynh_secure_remove --file="$tmpdir"
+fi
 
 chmod 750 "$final_path"
 chmod -R o-rwx "$final_path"
@@ -141,6 +156,19 @@ ynh_add_nginx_config
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
+# UPDATE A CONFIG FILE
+#=================================================
+ynh_script_progression --message="Updating a configuration file..." --weight=1
+
+ynh_add_config --template="../conf/diaspora.yml" --destination="$final_path/live/config/diaspora.yml"
+chmod 400 "$final_path/live/config/diaspora.yml"
+chown $app:$app "$final_path/live/config/diaspora.yml"
+
+ynh_add_config --template="../conf/database.yml" --destination="$final_path/live/config/database.yml"
+chmod 400 "$final_path/live/config/database.yml"
+chown $app:$app "$final_path/live/config/database.yml"
+
+#=================================================
 # BUILD APP
 #=================================================
 ynh_script_progression --message="Building app..." --weight=40
@@ -157,14 +185,6 @@ popd
 
 ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
 ynh_package_autoremove
-
-#=================================================
-# UPDATE A CONFIG FILE
-#=================================================
-ynh_script_progression --message="Updating a configuration file..." --weight=1
-
-ynh_add_config --template="../conf/diaspora.yml" --destination="$final_path/live/config/diaspora.yml"
-ynh_add_config --template="../conf/database.yml" --destination="$final_path/live/config/database.yml"
 
 #=================================================
 # SETUP SYSTEMD
