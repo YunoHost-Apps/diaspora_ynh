@@ -12,8 +12,9 @@ ruby_version=2.7
 nodejs_version=14
 bundler_version=2.1.4
 
-# Workaround for Mastodon on Bullseye
+# Workaround for ruby 2.7 on Bullseye
 # See https://github.com/mastodon/mastodon/issues/15751#issuecomment-873594463
+# Apparently fixed on ruby 3.0.4
 if [ "$(lsb_release --codename --short)" = "bullseye" ]; then
     case $YNH_ARCH in
         amd64)
