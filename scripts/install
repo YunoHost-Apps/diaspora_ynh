@@ -63,6 +63,8 @@ ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies $build_pkg_dep
 ynh_exec_warn_less ynh_install_ruby --ruby_version=$ruby_version
 ynh_exec_warn_less ynh_install_nodejs --nodejs_version=$nodejs_version
 
+ynh_package_autoremove
+
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
@@ -139,9 +141,6 @@ user.seed_aspects
 Role.add_admin user.person
 END
 popd
-
-ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
-ynh_package_autoremove
 
 #=================================================
 # SETUP SYSTEMD
