@@ -127,6 +127,8 @@ then
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source --dest_dir="$final_path/live" --keep="config/diaspora.yml config/database.yml"
 
+  ln -s $final_path/uploads $final_path/live/
+
 	cp "$tmpdir/diaspora.yml" "$final_path/live/config/diaspora.yml"
 	cp "$tmpdir/database.yml" "$final_path/live/config/database.yml"
 	ynh_secure_remove --file="$tmpdir"
