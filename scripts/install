@@ -1,16 +1,5 @@
 #!/bin/bash
 
-# TODO 
-# - which service to register to ynuhosto? diaspora.target only ? All of them ?
-# - a setting to enable / disable registration
-# - say something about the registration to https://the-federation.info/ 
-# - ...
-
-## vars for remove script
-can_remove_db=0
-can_remove_home=0
-can_remove_user=0
-
 #=================================================
 # GENERIC START
 #=================================================
@@ -18,15 +7,17 @@ can_remove_user=0
 #=================================================
 
 source _common.sh
+source ynh_install_ruby__2
 source /usr/share/yunohost/helpers
 
 #=================================================
 # MANAGE SCRIPT FAILURE
 #=================================================
-# Exit if an error occurs during the execution of the script
-ynh_clean_setup() {
-  ynh_clean_check_starting
+
+ynh_clean_setup () {
+	true
 }
+# Exit if an error occurs during the execution of the script
 ynh_abort_if_errors
 
 #=================================================
@@ -34,156 +25,185 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
+path_url="/"
 admin=$YNH_APP_ARG_ADMIN
-admin_password=$YNH_APP_ARG_ADMIN_PASSWORD
-admin_email=$(ynh_user_get_info --username=$admin --key=mail)
+password=$YNH_APP_ARG_PASSWORD
 
 app=$YNH_APP_INSTANCE_NAME
-final_path=/var/www/$app
+
+admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
 
 #=================================================
 # CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
 #=================================================
 ynh_script_progression --message="Validating installation parameters..." --weight=1
-# check path availability
-test ! -e "$final_path" || ynh_die "This path already contains a folder"
-can_remove_home=1
+
+final_path=/var/www/$app
+test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
+
 # Register (book) web path
-ynh_webpath_register --app=$app --domain=$domain --path_url=/
+ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
 
 #=================================================
 # STORE SETTINGS FROM MANIFEST
 #=================================================
-ynh_script_progression --message="Saving app settings..." --weight=1
+ynh_script_progression --message="Storing installation settings..." --weight=1
+
 ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=path --value=/
-ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+ynh_app_setting_set --app=$app --key=path --value=$path_url
 
 #=================================================
 # STANDARD MODIFICATIONS
 #=================================================
-
-#=================================================
 # INSTALL DEPENDENCIES
 #=================================================
 ynh_script_progression --message="Installing dependencies..." --weight=5
-ynh_install_app_dependencies $pkg_dependencies $ruby_build_dependencies
 
-#=================================================
-# CHECK DB AVAILABILITY
-#=================================================
-ynh_script_progression --message="Check DB availability"
-# now that we have psql for sure, test db existence
-ynh_script_progression --message="Checking DB availability" --weight=1
-ynh_psql_database_exists --database $app && ynh_die --message="There is already a database: $app"
-can_remove_db=1
+ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies $build_pkg_dependencies
+ynh_exec_warn_less ynh_install_ruby --ruby_version=$ruby_version
+ynh_exec_warn_less ynh_install_nodejs --nodejs_version=$nodejs_version
+
+ynh_package_autoremove
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Creating user..." --weight=1
+ynh_script_progression --message="Configuring system user..." --weight=1
+
 # Create a system user
-ynh_system_user_create --username=$app --home_dir=$final_path --use_shell
-can_remove_user=1
-mkdir -p $final_path
-chmod 0750 $final_path -R
-chown $app:www-data $final_path
-
-#=================================================
-# INSTALL RVM AND RUBY FOR CURRENT USER
-#=================================================
-ynh_script_progression --message="Installing rvm and ruby... (will take a long time)" --weight=20
-source ./install_ruby
-
-#=================================================
-# DOWNLOAD, CHECK AND UNPACK SOURCE
-#=================================================
-# Download, check integrity, unucompress and patch the source from app.src
-pushd $final_path
-ynh_script_progression --message="Download the sources..." --weight=10
-ynh_exec_warn_less sudo -u $app git clone https://github.com/diaspora/diaspora.git -b $current_tag
-popd
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
 #=================================================
 # CREATE A POSTGRESQL DATABASE
 #=================================================
-ynh_script_progression --message="Creating database..." --weight=1
+ynh_script_progression --message="Creating a PostgreSQL database..." --weight=1
+
 db_name=$(ynh_sanitize_dbid $app)
+db_user=$db_name
 ynh_app_setting_set --app=$app --key=db_name --value=$db_name
 ynh_psql_test_if_first_run
-ynh_exec_warn_less ynh_psql_setup_db --db_user=$db_name --db_name=$db_name
-db_pass=$(ynh_app_setting_get --app=$app --key=psqlpwd)
+ynh_psql_setup_db --db_user=$db_user --db_name=$db_name
+db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 
 #=================================================
-# EXPORT VARIABLES FOR TEMPLATING
+# DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-export app
-export domain
-export db_pass
-export final_path
-export admin
+ynh_script_progression --message="Setting up source files..." --weight=1
 
-#=================================================
-# CONFIGURE DIASPORA
-#=================================================
-ynh_script_progression --message="Configure diaspora..." --weight=1
-ynh_render_template ../conf/diaspora.yml $final_path/diaspora/config/diaspora.yml
-ynh_render_template ../conf/database.yml $final_path/diaspora/config/database.yml
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
+# Download, check integrity, uncompress and patch the source from app.src
+ynh_setup_source --dest_dir="$final_path/live"
+# create upload folder and link it
+mkdir $final_path/uploads
+ln -s $final_path/uploads $final_path/live/
 
-#=================================================
-# STORE THE CHECKSUM OF THE CONFIG FILE
-#=================================================
-# Calculate and store the config file checksum into the app settings
-ynh_store_file_checksum --file="$final_path/diaspora/config/diaspora.yml"
-ynh_store_file_checksum --file="$final_path/diaspora/config/database.yml"
-
-#=================================================
-# Bundle the ruby app
-#=================================================
-ynh_script_progression --message="Precompile assets (will take a long time)..." --weight=40
-source ./bundle_app
+chmod -R 750 "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
-# Create a dedicated nginx config
-ynh_script_progression --message="configure nginx..." --weight=1
+ynh_script_progression --message="Configuring NGINX web server..." --weight=1
+
+# Create a dedicated NGINX config
 ynh_add_nginx_config
 
 #=================================================
-# SETUP SYSTEMD
+# SPECIFIC SETUP
 #=================================================
-# Create a dedicated systemd config
-ynh_script_progression --message="configure systemd unit..." --weight=1
-source ./create_services
+# ADD A CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding a configuration file..." --weight=1
+
+ynh_add_config --template="../conf/diaspora.yml" --destination="$final_path/live/config/diaspora.yml"
+chmod 400 "$final_path/live/config/diaspora.yml"
+chown $app:$app "$final_path/live/config/diaspora.yml"
+
+ynh_add_config --template="../conf/database.yml" --destination="$final_path/live/config/database.yml"
+chmod 400 "$final_path/live/config/database.yml"
+chown $app:$app "$final_path/live/config/database.yml"
 
 #=================================================
-# ADVERTISE SERVICE IN ADMIN PANEL
+# BUILD APP
 #=================================================
-yunohost service add $app.target \
-  --log $final_path/diaspora/log/production.log \
-        $final_path/diaspora/log/unicorn-stderr.log\
-        $final_path/diaspora/log/unicorn-stdout.log\
-        $final_path/diaspora/log/sidekiq.log\
-  --description "Diaspora service (unicorn web and sidekiq)"
+ynh_script_progression --message="Building app..." --weight=40
 
-#=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_permission_update --permission "main" --add visitors
-
-#=================================================
-# CREATE AN ADMIN
-#=================================================
-ynh_script_progression --message="Create admin..." --weight=1
-pushd $final_path/diaspora
-sudo -u $app /bin/bash --login << EOF
-RAILS_ENV=production bundle exec rails console << END
-user = User.build({username: '$admin', email: '$admin_email', password: '$admin_password', password_confirmation: '$admin_password' })
+pushd $final_path/live
+  ynh_use_ruby
+  ynh_use_nodejs
+  ynh_gem install bundler:$bundler_version
+  ynh_exec_as $app $ynh_ruby_load_path $ld_preload script/configure_bundler
+  ynh_exec_as $app $ynh_ruby_load_path $ld_preload bin/bundle install --full-index --with=postgresql
+  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rake db:migrate
+  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/rake assets:precompile
+  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rails console << END
+user = User.build({username: '$admin', email: '$admin_mail', password: '$password', password_confirmation: '$password' })
 user.save
 user.seed_aspects
 Role.add_admin user.person
 END
-EOF
 popd
 
+#=================================================
+# SETUP SYSTEMD
+#=================================================
+ynh_script_progression --message="Configuring a systemd service..." --weight=1
+
+ynh_add_systemd_config --service="${app}_sidekiq" --template="diaspora_sidekiq.service"
+ynh_add_systemd_config --service="${app}_web" --template="diaspora_web.service"
+
+# tmp files
+install -T --mode=0644 -v ../conf/diaspora.tmpfiles.d /etc/tmpfiles.d/${app}.conf
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/tmpfiles.d/${app}.conf
+
+# target unit
+install -T --mode=0644 -v ../conf/diaspora.target /etc/systemd/system/${app}.target
+ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/systemd/system/${app}.target
+
+# reload, create, enable and start stuff
+systemctl daemon-reload
+systemd-tmpfiles --create
+systemctl enable ${app}.target --quiet
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# INTEGRATE SERVICE IN YUNOHOST
+#=================================================
+ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
+
+yunohost service add $app.target \
+  --log $final_path/live/log/production.log \
+        $final_path/live/log/unicorn-stderr.log\
+        $final_path/live/log/unicorn-stdout.log\
+        $final_path/live/log/sidekiq.log\
+  --description "Diaspora service (unicorn web and sidekiq)"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Starting a systemd service..." --weight=1
+
+systemctl restart ${app}.target
+ynh_systemd_action --service_name=${app}_web.service --action=restart --log_path="$final_path/live/log/production.log" --line_match="successfully configured the federation library"
+ynh_systemd_action --service_name=${app}_sidekiq.service --action=restart --log_path="systemd" --line_match="Running in ruby"
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+ynh_script_progression --message="Configuring permissions..." --weight=1
+
+ynh_permission_update --permission="main" --add="visitors"
+
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_script_progression --message="Reloading NGINX web server..." --weight=1
+
+ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Installation of $app completed" --last

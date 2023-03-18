@@ -36,7 +36,7 @@ configuration: ## Section
     ## However changing http to https is okay and has no consequences.
     ## If you do change the URL, you will have to start again as the URL
     ## will be hardcoded into the database.
-    url: "https://{{ domain }}"
+    url: "https://__DOMAIN__"
 
     ## Set the bundle of certificate authorities (CA) certificates.
     ## This is specific to your operating system.
@@ -176,10 +176,10 @@ configuration: ## Section
     #listen: 'unix:tmp/diaspora.sock'
     #listen: 'unix:/run/diaspora/diaspora.sock'
     #listen: '127.0.0.1:3000'
-    listen: unix:/run/{{ app }}/diaspora.sock
+    listen: unix:/run/__APP__/diaspora.sock
 
     ## Set the path for the PID file of the unicorn master process (default=tmp/pids/web.pid)
-    pid: '/run/{{ app }}/diaspora.pid'
+    pid: '/run/__APP__/diaspora.pid'
 
     ## Rails environment (default='development').
     ## The environment in which the server should be started by default.
@@ -553,7 +553,7 @@ configuration: ## Section
     enable: true
 
     ## Sender address used in mail sent by Diaspora.
-    sender_address: 'no-reply@{{ domain }}'
+    sender_address: 'no-reply@__DOMAIN__'
 
     ## This selects which mailer should be used. Use 'smtp' for a smtp
     ## connection or 'sendmail' to use the sendmail binary.
@@ -606,10 +606,10 @@ configuration: ## Section
     ## This doesn't make the user an admin but is used when a generic
     ## admin contact is needed, much like the postmaster role in mail
     ## systems. Set only the username, NOT the full ID.
-    account: "{{ admin }}"
+    account: "__ADMIN__"
 
     ## E-mail address to contact the administrator.
-    podmin_email: '{{ admin_email }}'
+    podmin_email: '__ADMIN_MAIL__'
 
   ## Settings related to relays
   relay: ## Section

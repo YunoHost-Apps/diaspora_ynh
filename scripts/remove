@@ -7,99 +7,94 @@
 #=================================================
 
 source _common.sh
+source ynh_install_ruby__2
 source /usr/share/yunohost/helpers
-
-can_remove_db=${can_remove_db:=1}
-can_remove_home=${can_remov_home:=1}
-can_remove_user=${can_remove_user:=1}
 
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Load settings"
+ynh_script_progression --message="Loading installation settings..." --weight=1
+
 app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get $app domain)
-db_name=$(ynh_app_setting_get $app db_name)
-final_path=$(ynh_app_setting_get $app final_path)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+db_user=$db_name
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
 
 #=================================================
 # STANDARD REMOVE
 #=================================================
+# REMOVE SERVICE INTEGRATION IN YUNOHOST
+#=================================================
+
+# Remove the service from the list of services known by YunoHost (added from `yunohost service add`)
+if ynh_exec_warn_less yunohost service status $app.target >/dev/null
+then
+	ynh_script_progression --message="Removing $app.target service integration..." --weight=1
+	yunohost service remove $app.target
+fi
+
+#=================================================
 # STOP AND REMOVE SERVICE
 #=================================================
-ynh_script_progression --message="Remove services"
-yunohost service remove $app.target
-systemctl stop ${app}.target ${app}_sidekiq.service ${app}_web.service
-systemctl disable ${app}.target ${app}_sidekiq.service ${app}_web.service --quiet
-ynh_secure_remove --file="/etc/systemd/system/${app}_web.service"
-ynh_secure_remove --file="/etc/systemd/system/${app}_sidekiq.service"
+ynh_script_progression --message="Stopping and removing the systemd service..." --weight=1
+
+systemctl stop ${app}.target
+systemctl disable ${app}.target --quiet
+ynh_remove_systemd_config --service="${app}_web"
+ynh_remove_systemd_config --service="${app}_sidekiq"
 ynh_secure_remove --file="/etc/tmpfiles.d/${app}.conf"
 ynh_secure_remove --file="/etc/systemd/system/${app}.target"
 ynh_secure_remove --file="/run/${app}"
 systemctl daemon-reload
 
 #=================================================
-# REMOVE SERVICE FROM ADMIN PANEL
-#=================================================
-
-if yunohost service status | grep -q $app
-then
-	echo "Remove $app service"
-	yunohost service remove $app
-fi
-
-#=================================================
 # REMOVE THE POSTGRESQL DATABASE
 #=================================================
-if [ $can_remove_db -eq 1 ]; then
-  ynh_script_progression --message="Remove database"
-  # Remove a database if it exists, along with the associated user
-  ynh_psql_remove_db $db_name $db_name
-fi
+ynh_script_progression --message="Removing the PostgreSQL database..." --weight=1
+
+# Remove a database if it exists, along with the associated user
+ynh_psql_remove_db --db_user=$db_user --db_name=$db_name
 
 #=================================================
-# REMOVE DEPENDENCIES
+# REMOVE APP MAIN DIR
 #=================================================
-ynh_script_progression --message="Remove app dependencies" --weight=10
-# Remove metapackage and its dependencies
-ynh_remove_app_dependencies
+ynh_script_progression --message="Removing app main directory..." --weight=1
+
+# Remove the app directory securely
+ynh_secure_remove --file="$final_path"
 
 #=================================================
 # REMOVE NGINX CONFIGURATION
 #=================================================
-ynh_script_progression --message="Remove nginx config"
+ynh_script_progression --message="Removing NGINX web server configuration..." --weight=1
 
-# Remove the dedicated nginx config
+# Remove the dedicated NGINX config
 ynh_remove_nginx_config
+
+#=================================================
+# REMOVE DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Removing dependencies..." --weight=10
+
+# Remove metapackage and its dependencies
+ynh_remove_ruby
+ynh_remove_nodejs
+ynh_remove_app_dependencies
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
 # REMOVE DEDICATED USER
 #=================================================
-if [ $can_remove_user -eq 1 ]; then
-  ynh_script_progression --message="Remove $app user"
-  # Delete a system user
-  # because we use gpg, sometimes rogue processes (gpg an d dirmngr) stays a bit,
-  # preventing the deletion of the user. Hence we kill all processes belonging to $app
-  pkill -9 -u `id -u $app`
-  ynh_system_user_delete $app
-fi
+ynh_script_progression --message="Removing the dedicated system user..." --weight=1
+
+# Delete a system user
+ynh_system_user_delete --username=$app
 
 #=================================================
-# REMOVE RUBY
+# END OF SCRIPT
 #=================================================
-ynh_script_progression --message="Remove ruby (if this is the last app using it)"
-source $final_path/Experimental_helpers/ynh_install_ruby/ynh_install_ruby
-ynh_remove_ruby
 
-#=================================================
-# REMOVE APP MAIN DIR
-#=================================================
-if [ $can_remove_home -eq 1 ]; then
-  ynh_script_progression --message="Remove $final_path"
-  # Remove the app directory securely
-  ynh_secure_remove "$final_path"
-fi
-
+ynh_script_progression --message="Removal of $app completed" --last
