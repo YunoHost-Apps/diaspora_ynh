@@ -91,9 +91,18 @@ if gpg --list-keys piotr.kuczynski@gmail.com >/dev/null 2>&1; then
 fi
 
 if ! [ -d "$final_path/live" ]; then
+  # NOTE if nobody never uploads anything, this won't exist yet
+  # creating it anyway, it's simpler if we can assume it exists always
+  # but we CANNOT assume it exists from previous version
+  if [ -d "$final_path/diaspora/public/uploads" ]; then
+    mv "$final_path/diaspora/public/uploads" "$final_path/uploads"
+  else
+    mkdir "$final_path/uploads"
+  fi
   ynh_delete_file_checksum --file="$final_path/diaspora/config/diaspora.yml"
   ynh_delete_file_checksum --file="$final_path/diaspora/config/database.yml"
   mv "$final_path/diaspora" "$final_path/live"
+  ls -s "$final_path/uploads" "$final_path/live/public"
   ynh_store_file_checksum --file="$final_path/live/config/diaspora.yml"
   ynh_store_file_checksum --file="$final_path/live/config/database.yml"
   chmod 750 "$final_path"
@@ -127,7 +136,7 @@ then
 	# Download, check integrity, uncompress and patch the source from app.src
 	ynh_setup_source --dest_dir="$final_path/live" --keep="config/diaspora.yml config/database.yml"
 
-  ln -s $final_path/uploads $final_path/live/
+  ln -s "$final_path/uploads" "$final_path/live/public"
 
 	cp "$tmpdir/diaspora.yml" "$final_path/live/config/diaspora.yml"
 	cp "$tmpdir/database.yml" "$final_path/live/config/database.yml"
