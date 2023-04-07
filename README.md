@@ -5,7 +5,8 @@ It shall NOT be edited by hand.
 
 # Diaspora for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/diaspora.svg)](https://dash.yunohost.org/appci/app/diaspora) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)  
+[![Integration level](https://dash.yunohost.org/integration/diaspora.svg)](https://dash.yunohost.org/appci/app/diaspora) ![Working status](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
+
 [![Install Diaspora with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=diaspora)
 
 *[Lire ce readme en français.](./README_fr.md)*
@@ -17,9 +18,11 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 Distributed social networking service
 
-**Shipped version:** 0.7.17.0~ynh1
+**Shipped version:** 0.7.18.1~ynh1
 
+## Screenshots
 
+![Screenshot of Diaspora](./doc/screenshots/Diaspora_latest.png)
 
 ## Disclaimers / important information
 
@@ -30,22 +33,23 @@ Distributed social networking service
 
 ## Documentation and resources
 
-* Official app website: https://diasporafoundation.org/
-* Official user documentation: https://wiki.diasporafoundation.org/FAQ_for_users
-* Official admin documentation: https://wiki.diasporafoundation.org/FAQ_for_pod_maintainers
-* Upstream app code repository: https://github.com/diaspora/diaspora
-* YunoHost documentation for this app: https://yunohost.org/app_diaspora
-* Report a bug: https://github.com/YunoHost-Apps/diaspora_ynh/issues
+* Official app website: <https://diasporafoundation.org/>
+* Official user documentation: <https://wiki.diasporafoundation.org/FAQ_for_users>
+* Official admin documentation: <https://wiki.diasporafoundation.org/FAQ_for_pod_maintainers>
+* Upstream app code repository: <https://github.com/diaspora/diaspora>
+* YunoHost documentation for this app: <https://yunohost.org/app_diaspora>
+* Report a bug: <https://github.com/YunoHost-Apps/diaspora_ynh/issues>
 
 ## Developer info
 
 Please send your pull request to the [testing branch](https://github.com/YunoHost-Apps/diaspora_ynh/tree/testing).
 
 To try the testing branch, please proceed like that.
-```
+
+``` bash
 sudo yunohost app install https://github.com/YunoHost-Apps/diaspora_ynh/tree/testing --debug
 or
 sudo yunohost app upgrade diaspora -u https://github.com/YunoHost-Apps/diaspora_ynh/tree/testing --debug
 ```
 
-**More info regarding app packaging:** https://yunohost.org/packaging_apps
+**More info regarding app packaging:** <https://yunohost.org/packaging_apps>
