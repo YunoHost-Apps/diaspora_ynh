@@ -15,7 +15,7 @@ export RBENV_ROOT="$rbenv_install_dir"
 export rbenv_root="$rbenv_install_dir"
 
 ruby_dependencies=""
-build_ruby_dependencies="libjemalloc-dev curl build-essential libreadline-dev zlib1g-dev libsqlite3-dev libssl-dev libxml2-dev libxslt-dev autoconf automake bison libtool"
+build_ruby_dependencies="curl build-essential libreadline-dev zlib1g-dev libsqlite3-dev libssl-dev libxml2-dev libxslt-dev autoconf automake bison libtool"
 pkg_dependencies="$pkg_dependencies $ruby_dependencies"
 build_pkg_dependencies="$build_pkg_dependencies $build_ruby_dependencies"
 

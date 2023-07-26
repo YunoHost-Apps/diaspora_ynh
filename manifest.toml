@@ -79,7 +79,6 @@ ram.runtime = "2000M"
         "libgmp-dev",
         "libssl-dev",
         # For Ruby
-        "libjemalloc-dev",
         "curl",
         "build-essential",
         "libreadline-dev",
