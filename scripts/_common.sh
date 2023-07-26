@@ -12,28 +12,22 @@ ruby_version=2.7
 nodejs_version=14
 bundler_version=2.1.4
 
-# Workaround for ruby 2.7 on Bullseye
-# See https://github.com/mastodon/mastodon/issues/15751#issuecomment-873594463
-# Apparently fixed on ruby 3.0.4
-if [ "$(lsb_release --codename --short)" = "bullseye" ]; then
-    case $YNH_ARCH in
-        amd64)
-            arch="x86_64"
-            ;;
-        arm64)
-            arch="aarch64"
-            ;;
-        armel|armhf)
-            arch="arm"
-            ;;
-        i386)
-            arch="i386"
-            ;;
-    esac
-    ld_preload="LD_PRELOAD=/usr/lib/$arch-linux-gnu/libjemalloc.so"
-else
-    ld_preload=""
-fi
+# jemalloc seems to be better for ROR apps, let's use it
+case $YNH_ARCH in
+    amd64)
+        arch="x86_64"
+        ;;
+    arm64)
+        arch="aarch64"
+        ;;
+    armel|armhf)
+        arch="arm"
+        ;;
+    i386)
+        arch="i386"
+        ;;
+esac
+ld_preload="LD_PRELOAD=/usr/lib/$arch-linux-gnu/libjemalloc.so"
 
 #=================================================
 # PERSONAL HELPERS
