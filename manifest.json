@@ -6,7 +6,7 @@
         "en": "Distributed social networking service",
         "fr": "Service de réseau social distribué"
     },
-    "version": "0.7.18.1~ynh1",
+    "version": "0.7.18.2~ynh1",
     "url": "https://diasporafoundation.org",
     "upstream": {
         "license": "AGPL-3.0",

@@ -18,7 +18,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 
 Distributed social networking service
 
-**Shipped version:** 0.7.18.1~ynh1
+**Shipped version:** 0.7.18.2~ynh1
 
 ## Screenshots
 
