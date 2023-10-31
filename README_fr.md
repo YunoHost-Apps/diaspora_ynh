@@ -37,7 +37,7 @@ Service de réseau social distribué
 * Documentation officielle utilisateur : <https://wiki.diasporafoundation.org/FAQ_for_users>
 * Documentation officielle de l’admin : <https://wiki.diasporafoundation.org/FAQ_for_pod_maintainers>
 * Dépôt de code officiel de l’app : <https://github.com/diaspora/diaspora>
-* Documentation YunoHost pour cette app : <https://yunohost.org/app_diaspora>
+* YunoHost Store: <https://apps.yunohost.org/app/diaspora>
 * Signaler un bug : <https://github.com/YunoHost-Apps/diaspora_ynh/issues>
 
 ## Informations pour les développeurs
