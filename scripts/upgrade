@@ -8,8 +8,6 @@ source _common.sh
 source ynh_install_ruby__2
 source /usr/share/yunohost/helpers
 
-admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
-
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
@@ -57,6 +55,13 @@ if ! [ -d "$install_dir/live" ]; then
 fi
 
 ynh_secure_remove "$install_dir/Experimental_helpers"
+
+if [[ -z "${admin:-}" ]]; then
+    admin=""
+    ynh_app_setting_set --app="$app" --key=admin --value="$admin"
+fi
+
+admin_mail=$(ynh_user_get_info --username="$admin" --key=mail)
 
 #=================================================
 # INSTALL DEPENDENCIES
