@@ -32,7 +32,6 @@ ld_preload="LD_PRELOAD=/usr/lib/$arch-linux-gnu/libjemalloc.so"
 _ynh_add_systemd_target() {
     ynh_add_config --template="diaspora.target" --destination="/etc/systemd/system/${app}.target"
     systemctl daemon-reload
-    systemd-tmpfiles --create
     systemctl enable "${app}.target" --quiet
 }
 _ynh_remove_systemd_target() {

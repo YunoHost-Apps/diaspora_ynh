@@ -35,6 +35,7 @@ ynh_setup_source --dest_dir="$install_dir/live"
 mkdir -p "$install_dir/uploads"
 ln -s "$install_dir/uploads" "$install_dir/live/public"
 
+chmod -R o-rwx "$install_dir"
 chown -R "$app:www-data" "$install_dir"
 
 #=================================================
@@ -83,9 +84,6 @@ ynh_add_nginx_config
 ynh_add_systemd_config --service="${app}_sidekiq" --template="diaspora_sidekiq.service"
 ynh_add_systemd_config --service="${app}_web" --template="diaspora_web.service"
 
-# Create tmpfile
-ynh_add_config --template="diaspora.tmpfiles.d" --destination="/etc/tmpfiles.d/${app}.conf"
-
 # Create target unit
 _ynh_add_systemd_target
 yunohost service add "$app.target" --description "Diaspora service (unicorn web and sidekiq)" \
@@ -93,6 +91,10 @@ yunohost service add "$app.target" --description "Diaspora service (unicorn web 
         "$install_dir/live/log/unicorn-stderr.log" \
         "$install_dir/live/log/unicorn-stdout.log" \
         "$install_dir/live/log/sidekiq.log"
+
+# Create tmpfile
+ynh_add_config --template="diaspora.tmpfiles.d" --destination="/etc/tmpfiles.d/${app}.conf"
+systemd-tmpfiles --create
 
 #=================================================
 # START SYSTEMD SERVICE
