@@ -1,8 +1,6 @@
 #!/bin/bash
 
 #=================================================
-# GENERIC START
-#=================================================
 # IMPORT GENERIC HELPERS
 #=================================================
 
@@ -11,132 +9,61 @@ source ynh_install_ruby__2
 source /usr/share/yunohost/helpers
 
 #=================================================
-# MANAGE SCRIPT FAILURE
+# INITIALIZE AND STORE SETTINGS
 #=================================================
-
-ynh_clean_setup () {
-	true
-}
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
-
-#=================================================
-# RETRIEVE ARGUMENTS FROM THE MANIFEST
-#=================================================
-
-domain=$YNH_APP_ARG_DOMAIN
-path_url="/"
-admin=$YNH_APP_ARG_ADMIN
-password=$YNH_APP_ARG_PASSWORD
-
-app=$YNH_APP_INSTANCE_NAME
 
 admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
 
 #=================================================
-# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
-#=================================================
-ynh_script_progression --message="Validating installation parameters..." --weight=1
-
-final_path=/var/www/$app
-test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
-
-# Register (book) web path
-ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
-
-#=================================================
-# STORE SETTINGS FROM MANIFEST
-#=================================================
-ynh_script_progression --message="Storing installation settings..." --weight=1
-
-ynh_app_setting_set --app=$app --key=domain --value=$domain
-ynh_app_setting_set --app=$app --key=path --value=$path_url
-
-#=================================================
-# STANDARD MODIFICATIONS
-#=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing dependencies..." --weight=5
-
-ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies $build_pkg_dependencies
+ynh_script_progression --message="Installing Ruby..." --weight=5
 ynh_exec_warn_less ynh_install_ruby --ruby_version=$ruby_version
+
+ynh_script_progression --message="Installing NodeJS..." --weight=5
 ynh_exec_warn_less ynh_install_nodejs --nodejs_version=$nodejs_version
-
-ynh_package_autoremove
-
-#=================================================
-# CREATE DEDICATED USER
-#=================================================
-ynh_script_progression --message="Configuring system user..." --weight=1
-
-# Create a system user
-ynh_system_user_create --username=$app --home_dir="$final_path"
-
-#=================================================
-# CREATE A POSTGRESQL DATABASE
-#=================================================
-ynh_script_progression --message="Creating a PostgreSQL database..." --weight=1
-
-db_name=$(ynh_sanitize_dbid $app)
-db_user=$db_name
-ynh_app_setting_set --app=$app --key=db_name --value=$db_name
-ynh_psql_test_if_first_run
-ynh_psql_setup_db --db_user=$db_user --db_name=$db_name
-db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 ynh_script_progression --message="Setting up source files..." --weight=1
 
-ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 # Download, check integrity, uncompress and patch the source from app.src
-ynh_setup_source --dest_dir="$final_path/live"
+ynh_setup_source --dest_dir="$install_dir/live"
+
 # create upload folder and link it
-mkdir -p "$final_path/uploads"
-ln -s "$final_path/uploads" "$final_path/live/public"
+mkdir -p "$install_dir/uploads"
+ln -s "$install_dir/uploads" "$install_dir/live/public"
 
-chmod -R 750 "$final_path"
-chown -R $app:www-data "$final_path"
+chown -R "$app:www-data" "$install_dir"
 
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Configuring NGINX web server..." --weight=1
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
-
-#=================================================
-# SPECIFIC SETUP
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding a configuration file..." --weight=1
+ynh_script_progression --message="Adding $app's configuration file..." --weight=1
 
-ynh_add_config --template="../conf/diaspora.yml" --destination="$final_path/live/config/diaspora.yml"
-chmod 400 "$final_path/live/config/diaspora.yml"
-chown $app:$app "$final_path/live/config/diaspora.yml"
+ynh_add_config --template="diaspora.yml" --destination="$install_dir/live/config/diaspora.yml"
+chmod 400 "$install_dir/live/config/diaspora.yml"
+chown "$app:$app" "$install_dir/live/config/diaspora.yml"
 
-ynh_add_config --template="../conf/database.yml" --destination="$final_path/live/config/database.yml"
-chmod 400 "$final_path/live/config/database.yml"
-chown $app:$app "$final_path/live/config/database.yml"
+ynh_add_config --template="database.yml" --destination="$install_dir/live/config/database.yml"
+chmod 400 "$install_dir/live/config/database.yml"
+chown "$app:$app" "$install_dir/live/config/database.yml"
 
 #=================================================
 # BUILD APP
 #=================================================
 ynh_script_progression --message="Building app..." --weight=40
 
-pushd $final_path/live
+pushd "$install_dir/live"
   ynh_use_ruby
   ynh_use_nodejs
-  ynh_gem install bundler:$bundler_version
-  ynh_exec_as $app $ynh_ruby_load_path $ld_preload script/configure_bundler
-  ynh_exec_as $app $ynh_ruby_load_path $ld_preload bin/bundle install --full-index --with=postgresql
-  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rake db:migrate
-  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/rake assets:precompile
-  ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/bundle exec rails console << END
+  ynh_gem install "bundler:$bundler_version"
+  ynh_exec_warn_less ynh_exec_as "$app" "$ynh_ruby_load_path" "$ld_preload" script/configure_bundler
+  ynh_exec_warn_less ynh_exec_as "$app" "$ynh_ruby_load_path" "$ld_preload" bin/bundle install --full-index --with=postgresql
+  ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/bundle exec rake db:migrate
+  ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/rake assets:precompile
+  ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/bundle exec rails console << END
 user = User.build({username: '$admin', email: '$admin_mail', password: '$password', password_confirmation: '$password' })
 user.save
 user.seed_aspects
@@ -145,62 +72,36 @@ END
 popd
 
 #=================================================
-# SETUP SYSTEMD
+# SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Configuring a systemd service..." --weight=1
+ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
 
+# Create a dedicated NGINX config
+ynh_add_nginx_config
+
+# Create a dedicated systemd config
 ynh_add_systemd_config --service="${app}_sidekiq" --template="diaspora_sidekiq.service"
 ynh_add_systemd_config --service="${app}_web" --template="diaspora_web.service"
 
-# tmp files
-install -T --mode=0644 -v ../conf/diaspora.tmpfiles.d /etc/tmpfiles.d/${app}.conf
-ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/tmpfiles.d/${app}.conf
+# Create tmpfile
+ynh_add_config --template="diaspora.tmpfiles.d" --destination="/etc/tmpfiles.d/${app}.conf"
 
-# target unit
-install -T --mode=0644 -v ../conf/diaspora.target /etc/systemd/system/${app}.target
-ynh_replace_string --match_string=__APP__ --replace_string=$app --target_file=/etc/systemd/system/${app}.target
-
-# reload, create, enable and start stuff
-systemctl daemon-reload
-systemd-tmpfiles --create
-systemctl enable ${app}.target --quiet
-
-#=================================================
-# GENERIC FINALIZATION
-#=================================================
-# INTEGRATE SERVICE IN YUNOHOST
-#=================================================
-ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
-
-yunohost service add $app.target \
-  --log $final_path/live/log/production.log \
-        $final_path/live/log/unicorn-stderr.log\
-        $final_path/live/log/unicorn-stdout.log\
-        $final_path/live/log/sidekiq.log\
-  --description "Diaspora service (unicorn web and sidekiq)"
+# Create target unit
+_ynh_add_systemd_target
+yunohost service add "$app.target" --description "Diaspora service (unicorn web and sidekiq)" \
+  --log "$install_dir/live/log/production.log" \
+        "$install_dir/live/log/unicorn-stderr.log" \
+        "$install_dir/live/log/unicorn-stdout.log" \
+        "$install_dir/live/log/sidekiq.log"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..." --weight=1
+ynh_script_progression --message="Starting $app's systemd service..." --weight=1
 
-systemctl restart ${app}.target
-ynh_systemd_action --service_name=${app}_web.service --action=restart --log_path="$final_path/live/log/production.log" --line_match="successfully configured the federation library"
-ynh_systemd_action --service_name=${app}_sidekiq.service --action=restart --log_path="systemd" --line_match="Running in ruby"
-
-#=================================================
-# SETUP SSOWAT
-#=================================================
-ynh_script_progression --message="Configuring permissions..." --weight=1
-
-ynh_permission_update --permission="main" --add="visitors"
-
-#=================================================
-# RELOAD NGINX
-#=================================================
-ynh_script_progression --message="Reloading NGINX web server..." --weight=1
-
-ynh_systemd_action --service_name=nginx --action=reload
+systemctl restart "${app}.target"
+ynh_systemd_action --service_name="${app}_web.service" --action=restart --log_path="$install_dir/live/log/production.log" --line_match="successfully configured the federation library"
+ynh_systemd_action --service_name="${app}_sidekiq.service" --action=restart --log_path="systemd" --line_match="Running in ruby"
 
 #=================================================
 # END OF SCRIPT

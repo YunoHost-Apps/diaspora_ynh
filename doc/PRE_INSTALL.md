@@ -1,4 +1,3 @@
-- There is currently no LDAP integration
 - the installation is very long, especially the frontend building step
 - As upstream doesn't support it, there is no possibility to change the endpoint/url of diaspora\*. Please choose it carefully!
 - The main permission should be granted to "visitors". In other term, diaspora is intented to be a public application. Only deviate from that if you know what you are doing!

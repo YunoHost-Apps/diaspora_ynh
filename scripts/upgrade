@@ -13,18 +13,18 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..." --weight=1
+#REMOVEME? ynh_script_progression --message="Loading installation settings..." --weight=1
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-admin=$(ynh_app_setting_get --app=$app --key=admin)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-db_name=$(ynh_app_setting_get --app=$app --key=db_name)
-db_user=$db_name
-db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
-admin=$(ynh_app_setting_get --app=$app --key=admin)
+#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
+#REMOVEME? path=$(ynh_app_setting_get --app=$app --key=path)
+#REMOVEME? admin=$(ynh_app_setting_get --app=$app --key=admin)
+#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
+#REMOVEME? db_name=$(ynh_app_setting_get --app=$app --key=db_name)
+#REMOVEME? db_user=$db_name
+#REMOVEME? db_pwd=$(ynh_app_setting_get --app=$app --key=psqlpwd)
+#REMOVEME? admin=$(ynh_app_setting_get --app=$app --key=admin)
 admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
 
 #=================================================
@@ -37,16 +37,16 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=1
+#REMOVEME? ynh_script_progression --message="Backing up the app before upgrading (may take a while)..." --weight=1
 
 # Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
+#REMOVEME? ynh_backup_before_upgrade
+#REMOVEME? ynh_clean_setup () {
   # Restore it if the upgrade fails
-	ynh_restore_upgradebackup
+#REMOVEME? 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -63,15 +63,15 @@ systemctl stop $app.target
 ynh_script_progression --message="Ensuring downward compatibility..." --weight=1
 
 # Cleaning legacy permissions
-if ynh_legacy_permissions_exists; then
-	ynh_legacy_permissions_delete_all
+#REMOVEME? if ynh_legacy_permissions_exists; then
+#REMOVEME? 	ynh_legacy_permissions_delete_all
 
 	ynh_app_setting_delete --app=$app --key=is_public
 fi
 
 # migrate from rvm to rbenv
 ynh_script_progression --message="Remove rvm if needed..." --weight=1
-if [ -e "$final_path/.rvm" ]; then
+if [ -e "$install_dir/.rvm" ]; then
   sudo -u $app --login << EOF
 rvm implode --force
 EOF
@@ -82,43 +82,43 @@ ynh_script_progression --message="Remove old rvm keys..." --weight=1
 if gpg --list-keys mpapis@gmail.com >/dev/null 2>&1; then
   ynh_print_info --message="Found mpapis key: deleting"
   sudo -u $app gpg --delete-keys mpapis@gmail.com
-  ynh_secure_remove "$final_path/mpapis@gmail.com.pgp"
+#REMOVEME?   ynh_secure_remove "$install_dir/mpapis@gmail.com.pgp"
 fi
 if gpg --list-keys piotr.kuczynski@gmail.com >/dev/null 2>&1; then
   ynh_print_info --message="Found piotr.kuczynski: deleting"
   sudo -u $app gpg --delete-keys piotr.kuczynski@gmail.com
-  ynh_secure_remove "$final_path/piotr.kuczynski@gmail.com.pgp"
+#REMOVEME?   ynh_secure_remove "$install_dir/piotr.kuczynski@gmail.com.pgp"
 fi
 
-if ! [ -d "$final_path/live" ]; then
+if ! [ -d "$install_dir/live" ]; then
   # NOTE if nobody never uploads anything, this won't exist yet
   # creating it anyway, it's simpler if we can assume it exists always
   # but we CANNOT assume it exists from previous version
-  if [ -d "$final_path/diaspora/public/uploads" ]; then
-    mv "$final_path/diaspora/public/uploads" "$final_path/uploads"
+  if [ -d "$install_dir/diaspora/public/uploads" ]; then
+    mv "$install_dir/diaspora/public/uploads" "$install_dir/uploads"
   else
-    mkdir "$final_path/uploads"
+    mkdir "$install_dir/uploads"
   fi
-  ynh_delete_file_checksum --file="$final_path/diaspora/config/diaspora.yml"
-  ynh_delete_file_checksum --file="$final_path/diaspora/config/database.yml"
-  mv "$final_path/diaspora" "$final_path/live"
-  ls -s "$final_path/uploads" "$final_path/live/public"
-  ynh_store_file_checksum --file="$final_path/live/config/diaspora.yml"
-  ynh_store_file_checksum --file="$final_path/live/config/database.yml"
-  chmod 750 "$final_path"
-  chmod -R o-rwx "$final_path"
-  chown -R $app:www-data "$final_path"
+  ynh_delete_file_checksum --file="$install_dir/diaspora/config/diaspora.yml"
+  ynh_delete_file_checksum --file="$install_dir/diaspora/config/database.yml"
+  mv "$install_dir/diaspora" "$install_dir/live"
+  ls -s "$install_dir/uploads" "$install_dir/live/public"
+  ynh_store_file_checksum --file="$install_dir/live/config/diaspora.yml"
+  ynh_store_file_checksum --file="$install_dir/live/config/database.yml"
+  chmod 750 "$install_dir"
+  chmod -R o-rwx "$install_dir"
+  chown -R $app:www-data "$install_dir"
 fi
 
-ynh_secure_remove "$final_path/Experimental_helpers"
+#REMOVEME? ynh_secure_remove "$install_dir/Experimental_helpers"
 
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..." --weight=1
+#REMOVEME? ynh_script_progression --message="Making sure dedicated system user exists..." --weight=1
 
 # Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
+#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -129,30 +129,30 @@ then
 	ynh_script_progression --message="Upgrading source files..." --weight=1
 
 	tmpdir="$(mktemp -d)"
-	cp "$final_path/live/config/diaspora.yml" "$tmpdir/diaspora.yml"
-	cp "$final_path/live/config/database.yml" "$tmpdir/database.yml"
-	ynh_secure_remove --file="$final_path/live"
+	cp "$install_dir/live/config/diaspora.yml" "$tmpdir/diaspora.yml"
+	cp "$install_dir/live/config/database.yml" "$tmpdir/database.yml"
+#REMOVEME? 	ynh_secure_remove --file="$install_dir/live"
 
 	# Download, check integrity, uncompress and patch the source from app.src
-	ynh_setup_source --dest_dir="$final_path/live" --keep="config/diaspora.yml config/database.yml"
+	ynh_setup_source --dest_dir="$install_dir/live" --keep="config/diaspora.yml config/database.yml"
 
-  ln -s "$final_path/uploads" "$final_path/live/public"
+  ln -s "$install_dir/uploads" "$install_dir/live/public"
 
-	cp "$tmpdir/diaspora.yml" "$final_path/live/config/diaspora.yml"
-	cp "$tmpdir/database.yml" "$final_path/live/config/database.yml"
+	cp "$tmpdir/diaspora.yml" "$install_dir/live/config/diaspora.yml"
+	cp "$tmpdir/database.yml" "$install_dir/live/config/database.yml"
 	ynh_secure_remove --file="$tmpdir"
 fi
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Upgrading dependencies..." --weight=1
+#REMOVEME? ynh_script_progression --message="Upgrading dependencies..." --weight=1
 
-ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies $build_pkg_dependencies
+#REMOVEME? ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies $build_pkg_dependencies
 ynh_exec_warn_less ynh_install_ruby --ruby_version=$ruby_version
 ynh_exec_warn_less ynh_install_nodejs --nodejs_version=$nodejs_version
 
@@ -171,20 +171,20 @@ ynh_add_nginx_config
 #=================================================
 ynh_script_progression --message="Updating a configuration file..." --weight=1
 
-ynh_add_config --template="../conf/diaspora.yml" --destination="$final_path/live/config/diaspora.yml"
-chmod 400 "$final_path/live/config/diaspora.yml"
-chown $app:$app "$final_path/live/config/diaspora.yml"
+ynh_add_config --template="../conf/diaspora.yml" --destination="$install_dir/live/config/diaspora.yml"
+chmod 400 "$install_dir/live/config/diaspora.yml"
+chown $app:$app "$install_dir/live/config/diaspora.yml"
 
-ynh_add_config --template="../conf/database.yml" --destination="$final_path/live/config/database.yml"
-chmod 400 "$final_path/live/config/database.yml"
-chown $app:$app "$final_path/live/config/database.yml"
+ynh_add_config --template="../conf/database.yml" --destination="$install_dir/live/config/database.yml"
+chmod 400 "$install_dir/live/config/database.yml"
+chown $app:$app "$install_dir/live/config/database.yml"
 
 #=================================================
 # BUILD APP
 #=================================================
 ynh_script_progression --message="Building app..." --weight=40
 
-pushd $final_path/live
+pushd $install_dir/live
   ynh_use_ruby
   ynh_use_nodejs
   ynh_gem install bundler:$bundler_version
@@ -194,7 +194,7 @@ pushd $final_path/live
   ynh_exec_warn_less ynh_exec_as $app RAILS_ENV=production $ynh_ruby_load_path $ld_preload bin/rake assets:precompile
 popd
 
-ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
+#REMOVEME? ynh_exec_warn_less ynh_install_app_dependencies $pkg_dependencies
 ynh_package_autoremove
 
 #=================================================
@@ -226,10 +226,10 @@ systemctl enable ${app}.target --quiet
 ynh_script_progression --message="Integrating service in YunoHost..." --weight=1
 
 yunohost service add $app.target \
-  --log $final_path/live/log/production.log \
-        $final_path/live/log/unicorn-stderr.log\
-        $final_path/live/log/unicorn-stdout.log\
-        $final_path/live/log/sidekiq.log\
+  --log $install_dir/live/log/production.log \
+        $install_dir/live/log/unicorn-stderr.log\
+        $install_dir/live/log/unicorn-stdout.log\
+        $install_dir/live/log/sidekiq.log\
   --description "Diaspora service (unicorn web and sidekiq)"
 
 #=================================================
@@ -238,15 +238,15 @@ yunohost service add $app.target \
 ynh_script_progression --message="Starting a systemd service..." --weight=1
 
 systemctl restart ${app}.target
-ynh_systemd_action --service_name=${app}_web.service --action=restart --log_path="$final_path/live/log/production.log" --line_match="successfully configured the federation library"
+ynh_systemd_action --service_name=${app}_web.service --action=restart --log_path="$install_dir/live/log/production.log" --line_match="successfully configured the federation library"
 ynh_systemd_action --service_name=${app}_sidekiq.service --action=restart --log_path="systemd" --line_match="Running in ruby"
 
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..." --weight=1
+#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..." --weight=1
 
-ynh_systemd_action --service_name=nginx --action=reload
+#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT

@@ -1,7 +1,0 @@
-SOURCE_URL=https://github.com/diaspora/diaspora/archive/refs/tags/v0.7.18.2.tar.gz
-SOURCE_SUM=0b5828aa45af2361bfda4cd0f1e97070c322d90f1d16416bae2cba2418af9930
-SOURCE_SUM_PRG=sha256sum
-SOURCE_FORMAT=tar.gz
-SOURCE_IN_SUBDIR=true
-SOURCE_FILENAME=
-SOURCE_EXTRACT=true
