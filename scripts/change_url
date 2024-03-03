@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+source _common.sh
+source ynh_install_ruby__2
+source /usr/share/yunohost/helpers
+
+#=================================================
+# INITIALIZE AND STORE SETTINGS
+#=================================================
+
+admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
+
+#=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Stopping $app's systemd service..." --weight=1
+
+ynh_systemd_action --service_name="$app.target" --action="stop" --log_path="/var/log/$app/$app.log"
+
+#=================================================
+# MODIFY URL IN NGINX CONF
+#=================================================
+ynh_script_progression --message="Updating NGINX web server configuration..." --weight=1
+
+# this will most likely adjust NGINX config correctly
+ynh_change_url_nginx_config
+
+#=================================================
+# UPDATE A CONFIG FILE
+#=================================================
+ynh_script_progression --message="Updating a configuration file..." --weight=1
+
+ynh_add_config --template="diaspora.yml" --destination="$install_dir/live/config/diaspora.yml"
+chmod 400 "$install_dir/live/config/diaspora.yml"
+chown "$app:$app" "$install_dir/live/config/diaspora.yml"
+
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Starting $app's systemd service..." --weight=1
+
+systemctl restart "${app}.target"
+ynh_systemd_action --service_name="${app}_web.service" --action=restart --log_path="$install_dir/live/log/production.log" --line_match="successfully configured the federation library"
+ynh_systemd_action --service_name="${app}_sidekiq.service" --action=restart --log_path="systemd" --line_match="Running in ruby"
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Change of URL completed for $app" --last

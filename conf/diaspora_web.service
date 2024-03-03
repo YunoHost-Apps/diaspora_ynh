@@ -5,17 +5,17 @@ PartOf=__APP__.target
 [Service]
 Type=simple
 User=__APP__
-WorkingDirectory=__FINALPATH__/live
+WorkingDirectory=__INSTALL_DIR__/live
 Environment="__LD_PRELOAD__"
 Environment="RAILS_ENV=production"
 Environment="__YNH_RUBY_LOAD_PATH__"
 PIDFile=/run/__APP__/diaspora.pid
-ExecStart=__FINAL_PATH__/live/bin/bundle exec unicorn -c config/unicorn.rb -E production
+ExecStart=__INSTALL_DIR__/live/bin/bundle exec unicorn -c config/unicorn.rb -E production
 ExecReload=/bin/kill -USR2 $MAINPID
 Restart=always
 
 # Sandboxing options to harden security
-# Depending on specificities of your service/app, you may need to tweak these 
+# Depending on specificities of your service/app, you may need to tweak these
 # .. but this should be a good baseline
 # Details for these options: https://www.freedesktop.org/software/systemd/man/systemd.exec.html
 NoNewPrivileges=yes
@@ -42,7 +42,7 @@ CapabilityBoundingSet=~CAP_BLOCK_SUSPEND CAP_WAKE_ALARM
 CapabilityBoundingSet=~CAP_SYS_TTY_CONFIG
 CapabilityBoundingSet=~CAP_MAC_ADMIN CAP_MAC_OVERRIDE
 CapabilityBoundingSet=~CAP_NET_ADMIN CAP_NET_BROADCAST CAP_NET_RAW
-CapabilityBoundingSet=~CAP_SYS_ADMIN CAP_SYS_PTRACE CAP_SYSLOG 
+CapabilityBoundingSet=~CAP_SYS_ADMIN CAP_SYS_PTRACE CAP_SYSLOG
 
 [Install]
 WantedBy=__APP__.target
