@@ -4,6 +4,4 @@ test_format = 1.0
 
 [default]
 
-    test_upgrade_from.ee7996edba39c1978b0986aabc89042f949e335f.name = "0.7.16.0-ynh1"
-    test_upgrade_from.f6bc22257c54478420ed42480f346f25601ee87a.name = "0.7.17.0~ynh1"
-    test_upgrade_from.bcba30ecc623956f98ba0ab0b4e545ba665ffe27.name = "0.7.18.1~ynh1"
+    test_upgrade_from.3a75b9a45f6ef65e8eef32ff5ba0c8d0b7ae9c8d.name = "0.7.18.2~ynh2"
