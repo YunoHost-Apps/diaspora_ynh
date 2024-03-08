@@ -9,7 +9,7 @@ description.fr = "Service de réseau social distribué"
 
 version = "0.7.18.2~ynh2"
 
-maintainers = ["rafi59"]
+maintainers = ["autra"]
 
 [upstream]
 license = "AGPL-3.0"
