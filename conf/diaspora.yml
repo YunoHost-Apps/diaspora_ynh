@@ -557,7 +557,7 @@ configuration: ## Section
 
     ## This selects which mailer should be used. Use 'smtp' for a smtp
     ## connection or 'sendmail' to use the sendmail binary.
-    method: 'sendmail'
+    method: 'smtp'
 
     ## Ignore if method isn't 'smtp'.
     smtp: ## Section
@@ -565,36 +565,39 @@ configuration: ## Section
       ## Host and port of the smtp server handling outgoing mail.
       ## This should match the common name of the certificate sent by
       ## the SMTP server, if it sends one. (default port=587)
-      #host: 'smtp.example.org'
-      #port: 587
+      # we use localhost because I don't know an easy way to determine the main domain of an ynh instance
+      # it forces us to disable certificate verification below though...
+      host: 'localhost'
+      port: 25
 
       ## Authentication required to send mail (default='plain').
       ## Use one of 'plain', 'login' or 'cram_md5'. Use 'none'
       ## if server does not support authentication.
-      #authentication: 'plain'
+      authentication: 'plain'
 
       ## Credentials to log in to the SMTP server.
       ## May be necessary if authentication is not 'none'.
-      #username: 'change_me'
-      #password: 'change_me'
+      username: '__APP__'
+      password: '__MAIL_PWD__'
 
       ## Automatically enable TLS (default=true).
       ## Leave this commented out if authentication is set to 'none'.
       #starttls_auto: true
 
       ## The domain for the HELO command, if needed.
-      #domain: 'smtp.example.org'
+      domain: '__DOMAIN__'
 
       ## OpenSSL verify mode used when connecting to a SMTP server with TLS.
       ## Set this to 'none' if you have a self-signed certificate. Possible
       ## values: 'none', 'peer'.
-      #openssl_verify_mode: 'none'
+      # We use localhost because I don't 
+      openssl_verify_mode: 'none'
 
     ## Ignore if method isn't 'sendmail'
-    sendmail: ## Section
+    # sendmail: ## Section
 
       ## The path to the sendmail binary (default='/usr/sbin/sendmail')
-      location: '/usr/sbin/sendmail'
+      # location: '/usr/sbin/sendmail'
 
       ## Use exim and sendmail (default=false)
       #exim_fix: false
