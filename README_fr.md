@@ -17,7 +17,7 @@ Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) po
 ## Vue d’ensemble
 
 Service de réseau social distribué
-**Version incluse :** 0.7.18.2~ynh2
+**Version incluse :** 0.7.18.2~ynh3
 
 ## Captures d’écran
 
