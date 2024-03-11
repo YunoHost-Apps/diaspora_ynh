@@ -17,8 +17,7 @@ If you don't have YunoHost, please consult [the guide](https://yunohost.org/#/in
 ## Overview
 
 Distributed social networking service
-
-**Shipped version:** 0.7.18.2~ynh2
+**Shipped version:** 0.7.18.2~ynh3
 
 ## Screenshots
 
@@ -26,12 +25,12 @@ Distributed social networking service
 
 ## Documentation and resources
 
-* Official app website: <https://diasporafoundation.org/>
-* Official user documentation: <https://wiki.diasporafoundation.org/FAQ_for_users>
-* Official admin documentation: <https://wiki.diasporafoundation.org/FAQ_for_pod_maintainers>
-* Upstream app code repository: <https://github.com/diaspora/diaspora>
-* YunoHost Store: <https://apps.yunohost.org/app/diaspora>
-* Report a bug: <https://github.com/YunoHost-Apps/diaspora_ynh/issues>
+- Official app website: <https://diasporafoundation.org/>
+- Official user documentation: <https://wiki.diasporafoundation.org/FAQ_for_users>
+- Official admin documentation: <https://wiki.diasporafoundation.org/FAQ_for_pod_maintainers>
+- Upstream app code repository: <https://github.com/diaspora/diaspora>
+- YunoHost Store: <https://apps.yunohost.org/app/diaspora>
+- Report a bug: <https://github.com/YunoHost-Apps/diaspora_ynh/issues>
 
 ## Developer info
 
