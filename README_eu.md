@@ -18,7 +18,7 @@ EZ editatu eskuz.
 
 
 
-**Paketatutako bertsioa:** 0.7.18.2~ynh3
+**Paketatutako bertsioa:** 0.9.0.0~ynh1
 
 ## Pantaila-argazkiak
 

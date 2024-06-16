@@ -18,7 +18,7 @@ Il NE doit PAS être modifié à la main.
 
 Service de réseau social distribué
 
-**Version incluse :** 0.7.18.2~ynh3
+**Version incluse :** 0.9.0.0~ynh1
 
 ## Captures d’écran
 

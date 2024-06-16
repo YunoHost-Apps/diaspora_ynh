@@ -18,7 +18,7 @@ It shall NOT be edited by hand.
 
 Distributed social networking service
 
-**Shipped version:** 0.7.18.2~ynh3
+**Shipped version:** 0.9.0.0~ynh1
 
 ## Screenshots
 
