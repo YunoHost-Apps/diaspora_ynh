@@ -62,15 +62,24 @@ ram.runtime = "2000M"
 
     [resources.apt]
     packages = [
-        "cmake",
-        "imagemagick",
-        "ghostscript",
+        "build-essential",
         "curl",
+        "gsfonts",
+        "imagemagick",
         "libmagickwand-dev",
-        "git",
-        "libpq-dev",
         "redis-server",
+        "libssl-dev",
+        "libcurl4-openssl-dev",
+        "libxml2-dev",
+        "libxslt1-dev",
+        "libidn11-dev",
+        "libpq-dev",
+
         "postgresql",
+
+        # Is it still required?
+        "cmake",
+        "ghostscript",
         "libffi-dev",
         "libgdbm-dev",
         "libncurses5-dev",
@@ -78,16 +87,11 @@ ram.runtime = "2000M"
         "pkg-config",
         "sqlite3",
         "libgmp-dev",
-        "libssl-dev",
         # For Ruby
         "libjemalloc-dev",
-        "curl",
-        "build-essential",
         "libreadline-dev",
         "zlib1g-dev",
         "libsqlite3-dev",
-        "libssl-dev",
-        "libxml2-dev",
         "libxslt-dev",
         "autoconf",
         "automake",
