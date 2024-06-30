@@ -5,7 +5,7 @@ EZ editatu eskuz.
 
 # Diaspora YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/diaspora.svg)](https://dash.yunohost.org/appci/app/diaspora) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
+[![Integrazio maila](https://dash.yunohost.org/integration/diaspora.svg)](https://ci-apps.yunohost.org/ci/apps/diaspora/) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
 
 [![Instalatu Diaspora YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=diaspora)
 

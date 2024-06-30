@@ -5,7 +5,7 @@ It shall NOT be edited by hand.
 
 # Diaspora for YunoHost
 
-[![Integration level](https://dash.yunohost.org/integration/diaspora.svg)](https://dash.yunohost.org/appci/app/diaspora) ![Working status](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
+[![Integration level](https://dash.yunohost.org/integration/diaspora.svg)](https://ci-apps.yunohost.org/ci/apps/diaspora/) ![Working status](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Maintenance status](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
 
 [![Install Diaspora with YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=diaspora)
 
