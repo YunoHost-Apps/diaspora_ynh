@@ -42,9 +42,9 @@ chown -R "$app:www-data" "$install_dir"
 #=================================================
 ynh_script_progression --message="Adding $app's configuration file..." --weight=1
 
-ynh_add_config --template="diaspora.yml" --destination="$install_dir/live/config/diaspora.yml"
-chmod 400 "$install_dir/live/config/diaspora.yml"
-chown "$app:$app" "$install_dir/live/config/diaspora.yml"
+ynh_add_config --template="diaspora.toml" --destination="$install_dir/live/config/diaspora.toml"
+chmod 400 "$install_dir/live/config/diaspora.toml"
+chown "$app:$app" "$install_dir/live/config/diaspora.toml"
 
 ynh_add_config --template="database.yml" --destination="$install_dir/live/config/database.yml"
 chmod 400 "$install_dir/live/config/database.yml"
