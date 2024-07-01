@@ -42,9 +42,9 @@ chown -R "$app:www-data" "$install_dir"
 #=================================================
 ynh_script_progression --message="Adding $app's configuration file..." --weight=1
 
-ynh_add_config --template="diaspora.yml" --destination="$install_dir/live/config/diaspora.yml"
-chmod 400 "$install_dir/live/config/diaspora.yml"
-chown "$app:$app" "$install_dir/live/config/diaspora.yml"
+ynh_add_config --template="diaspora.toml" --destination="$install_dir/live/config/diaspora.toml"
+chmod 400 "$install_dir/live/config/diaspora.toml"
+chown "$app:$app" "$install_dir/live/config/diaspora.toml"
 
 ynh_add_config --template="database.yml" --destination="$install_dir/live/config/database.yml"
 chmod 400 "$install_dir/live/config/database.yml"
@@ -60,8 +60,8 @@ pushd "$install_dir/live"
   ynh_use_nodejs
   ynh_gem install "bundler:$bundler_version"
   ynh_exec_warn_less ynh_exec_as "$app" "$ynh_ruby_load_path" "$ld_preload" script/configure_bundler
-  ynh_exec_warn_less ynh_exec_as "$app" "$ynh_ruby_load_path" "$ld_preload" bin/bundle install --full-index --with=postgresql
-  ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/bundle exec rake db:migrate
+  ynh_exec_warn_less ynh_exec_as "$app" "$ynh_ruby_load_path" "$ld_preload" bin/bundle install --full-index
+  ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/rake db:migrate
   ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/rake assets:precompile
   ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/bundle exec rails console << END
 user = User.build({username: '$admin', email: '$admin_mail', password: '$password', password_confirmation: '$password' })
@@ -85,10 +85,10 @@ ynh_add_systemd_config --service="${app}_web" --template="diaspora_web.service"
 
 # Create target unit
 _ynh_add_systemd_target
-yunohost service add "$app.target" --description "Diaspora service (unicorn web and sidekiq)" \
+yunohost service add "$app.target" --description "Diaspora service (web and sidekiq)" \
   --log "$install_dir/live/log/production.log" \
-        "$install_dir/live/log/unicorn-stderr.log" \
-        "$install_dir/live/log/unicorn-stdout.log" \
+        "$install_dir/live/log/web-stderr.log" \
+        "$install_dir/live/log/web-stdout.log" \
         "$install_dir/live/log/sidekiq.log"
 
 # Create tmpfile
