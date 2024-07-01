@@ -135,10 +135,10 @@ ynh_add_systemd_config --service="${app}_sidekiq" --template="diaspora_sidekiq.s
 ynh_add_systemd_config --service="${app}_web" --template="diaspora_web.service"
 # Create target unit
 _ynh_add_systemd_target
-yunohost service add "$app.target" --description "Diaspora service (unicorn web and sidekiq)" \
+yunohost service add "$app.target" --description "Diaspora service (web and sidekiq)" \
   --log "$install_dir/live/log/production.log" \
-        "$install_dir/live/log/unicorn-stderr.log" \
-        "$install_dir/live/log/unicorn-stdout.log" \
+        "$install_dir/live/log/web-stderr.log" \
+        "$install_dir/live/log/web-stdout.log" \
         "$install_dir/live/log/sidekiq.log"
 
 # Create tmpfile
