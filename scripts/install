@@ -1,9 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -27,15 +23,14 @@ ynh_nodejs_install
 #=================================================
 ynh_script_progression "Setting up source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir/live"
 
-# create upload folder and link it
 mkdir -p "$install_dir/uploads"
 ln -s "$install_dir/uploads" "$install_dir/live/public"
 
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod -R o-rwx "$install_dir"
-#REMOVEME? Assuming the install dir is setup using ynh_setup_source, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown -R "$app:www-data" "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R "$app:www-data" "$install_dir"
+
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
@@ -44,8 +39,6 @@ ynh_script_progression "Adding $app's configuration file..."
 ynh_config_add --template="diaspora.toml" --destination="$install_dir/live/config/diaspora.toml"
 
 ynh_config_add --template="database.yml" --destination="$install_dir/live/config/database.yml"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chmod 400 "$install_dir/live/config/database.yml"
-#REMOVEME? Assuming the file is setup using ynh_config_add, the proper chmod/chowns are now already applied and it shouldn't be necessary to tweak perms | chown "$app:$app" "$install_dir/live/config/database.yml"
 
 #=================================================
 # BUILD APP
@@ -53,7 +46,6 @@ ynh_config_add --template="database.yml" --destination="$install_dir/live/config
 ynh_script_progression "Building app..."
 
 pushd "$install_dir/live"
-
   gem install "bundler:$bundler_version"
   ynh_hide_warnings ynh_exec_as_app ruby "$ld_preload" script/configure_bundler
   ynh_hide_warnings ynh_exec_as_app ruby "$ld_preload" bin/bundle install --full-index --with=postgresql
@@ -72,10 +64,8 @@ popd
 #=================================================
 ynh_script_progression "Adding system configurations related to $app..."
 
-# Create a dedicated NGINX config
 ynh_config_add_nginx
 
-# Create a dedicated systemd config
 ynh_config_add_systemd --service="${app}_sidekiq" --template="diaspora_sidekiq.service"
 ynh_config_add_systemd --service="${app}_web" --template="diaspora_web.service"
 
