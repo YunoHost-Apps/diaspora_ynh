@@ -52,7 +52,7 @@ fi
 if [ -f "$install_dir/live/config/diaspora.yml" ]; then
     ynh_backup_if_checksum_is_different --file="$install_dir/live/config/diaspora.yml"
     ynh_delete_file_checksum --file="$install_dir/live/config/diaspora.yml"
-    ynh_secure_remove --file="$install_dir/live/config/diaspora.yml"
+    ynh_safe_rm "$install_dir/live/config/diaspora.yml"
     ynh_print_warn "diaspora.yml is being migrated to diapora.toml. Please handle changes if you manually edited this file."
 fi
 
