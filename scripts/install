@@ -28,9 +28,6 @@ ynh_setup_source --dest_dir="$install_dir/live"
 mkdir -p "$install_dir/uploads"
 ln -s "$install_dir/uploads" "$install_dir/live/public"
 
-chmod -R o-rwx "$install_dir"
-chown -R "$app:www-data" "$install_dir"
-
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
@@ -47,11 +44,11 @@ ynh_script_progression "Building app..."
 
 pushd "$install_dir/live"
   gem install "bundler:$bundler_version"
-  ynh_hide_warnings ynh_exec_as_app ruby "$ld_preload" script/configure_bundler
-  ynh_hide_warnings ynh_exec_as_app ruby "$ld_preload" bin/bundle install --full-index --with=postgresql
-  ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production ruby bin/bundle exec rake db:migrate
-  ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production ruby "$ld_preload" bin/rake assets:precompile
-  ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production ruby "$ld_preload" bin/bundle exec rails console << END
+  ynh_hide_warnings ynh_exec_as_app "$ld_preload" script/configure_bundler
+  ynh_hide_warnings ynh_exec_as_app "$ld_preload" bin/bundle install --full-index --with=postgresql
+  ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production bin/bundle exec rake db:migrate
+  ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production "$ld_preload" bin/rake assets:precompile
+  ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production "$ld_preload" bin/bundle exec rails console << END
 user = User.build({username: '$admin', email: '$admin_mail', password: '$password', password_confirmation: '$password' })
 user.save
 user.seed_aspects

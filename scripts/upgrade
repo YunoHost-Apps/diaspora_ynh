@@ -88,9 +88,6 @@ ynh_setup_source --dest_dir="$install_dir/live" --full_replace --keep="config/di
 mkdir -p "$install_dir/uploads"
 ln -s "$install_dir/uploads" "$install_dir/live/public"
 
-chmod -R o-rwx "$install_dir"
-chown -R "$app:www-data" "$install_dir"
-
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
