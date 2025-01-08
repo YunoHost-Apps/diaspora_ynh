@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #=================================================
-# COMMON VARIABLES
+# COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
 ruby_version=3.3.3
@@ -25,26 +25,14 @@ case $YNH_ARCH in
 esac
 ld_preload="LD_PRELOAD=/usr/lib/$arch-linux-gnu/libjemalloc.so"
 
-#=================================================
-# PERSONAL HELPERS
-#=================================================
-
 _ynh_add_systemd_target() {
-    ynh_add_config --template="diaspora.target" --destination="/etc/systemd/system/${app}.target"
+    ynh_config_add --template="diaspora.target" --destination="/etc/systemd/system/${app}.target"
     systemctl daemon-reload
     systemctl enable "${app}.target" --quiet
 }
 _ynh_remove_systemd_target() {
     systemctl stop "${app}.target"
     systemctl disable "${app}.target" --quiet
-    ynh_secure_remove --file="/etc/systemd/system/${app}.target"
+    ynh_safe_rm "/etc/systemd/system/${app}.target"
     systemctl daemon-reload
 }
-
-#=================================================
-# EXPERIMENTAL HELPERS
-#=================================================
-
-#=================================================
-# FUTURE OFFICIAL HELPERS
-#=================================================

@@ -1,9 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -16,54 +12,43 @@ admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
 #=================================================
 # INSTALL DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Installing Ruby..." --weight=5
-ynh_exec_warn_less ynh_install_ruby --ruby_version=$ruby_version
+ynh_script_progression "Installing Ruby..."
+ynh_ruby_install
 
-ynh_script_progression --message="Installing NodeJS..." --weight=5
-ynh_exec_warn_less ynh_install_nodejs --nodejs_version=$nodejs_version
+ynh_script_progression "Installing NodeJS..."
+ynh_nodejs_install
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression --message="Setting up source files..." --weight=1
+ynh_script_progression "Setting up source files..."
 
-# Download, check integrity, uncompress and patch the source from app.src
 ynh_setup_source --dest_dir="$install_dir/live"
 
-# create upload folder and link it
 mkdir -p "$install_dir/uploads"
 ln -s "$install_dir/uploads" "$install_dir/live/public"
-
-chmod -R o-rwx "$install_dir"
-chown -R "$app:www-data" "$install_dir"
 
 #=================================================
 # ADD A CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding $app's configuration file..." --weight=1
+ynh_script_progression "Adding $app's configuration file..."
 
-ynh_add_config --template="diaspora.toml" --destination="$install_dir/live/config/diaspora.toml"
-chmod 400 "$install_dir/live/config/diaspora.toml"
-chown "$app:$app" "$install_dir/live/config/diaspora.toml"
+ynh_config_add --template="diaspora.toml" --destination="$install_dir/live/config/diaspora.toml"
 
-ynh_add_config --template="database.yml" --destination="$install_dir/live/config/database.yml"
-chmod 400 "$install_dir/live/config/database.yml"
-chown "$app:$app" "$install_dir/live/config/database.yml"
+ynh_config_add --template="database.yml" --destination="$install_dir/live/config/database.yml"
 
 #=================================================
 # BUILD APP
 #=================================================
-ynh_script_progression --message="Building app..." --weight=40
+ynh_script_progression "Building app..."
 
 pushd "$install_dir/live"
-  ynh_use_ruby
-  ynh_use_nodejs
-  ynh_gem install "bundler:$bundler_version"
-  ynh_exec_warn_less ynh_exec_as "$app" "$ynh_ruby_load_path" "$ld_preload" script/configure_bundler
-  ynh_exec_warn_less ynh_exec_as "$app" "$ynh_ruby_load_path" "$ld_preload" bin/bundle install --full-index
-  ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/rake db:migrate
-  ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/rake assets:precompile
-  ynh_exec_warn_less ynh_exec_as "$app" RAILS_ENV=production "$ynh_ruby_load_path" "$ld_preload" bin/bundle exec rails console << END
+  gem install "bundler:$bundler_version"
+  ynh_hide_warnings ynh_exec_as_app "$ld_preload" script/configure_bundler
+  ynh_hide_warnings ynh_exec_as_app "$ld_preload" bin/bundle install --full-index --with=postgresql
+  ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production bin/bundle exec rake db:migrate
+  ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production "$ld_preload" bin/rake assets:precompile
+  ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production "$ld_preload" bin/bundle exec rails console << END
 user = User.build({username: '$admin', email: '$admin_mail', password: '$password', password_confirmation: '$password' })
 user.save
 user.seed_aspects
@@ -74,14 +59,12 @@ popd
 #=================================================
 # SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
+ynh_script_progression "Adding system configurations related to $app..."
 
-# Create a dedicated NGINX config
-ynh_add_nginx_config
+ynh_config_add_nginx
 
-# Create a dedicated systemd config
-ynh_add_systemd_config --service="${app}_sidekiq" --template="diaspora_sidekiq.service"
-ynh_add_systemd_config --service="${app}_web" --template="diaspora_web.service"
+ynh_config_add_systemd --service="${app}_sidekiq" --template="diaspora_sidekiq.service"
+ynh_config_add_systemd --service="${app}_web" --template="diaspora_web.service"
 
 # Create target unit
 _ynh_add_systemd_target
@@ -92,20 +75,20 @@ yunohost service add "$app.target" --description "Diaspora service (web and side
         "$install_dir/live/log/sidekiq.log"
 
 # Create tmpfile
-ynh_add_config --template="diaspora.tmpfiles.d" --destination="/etc/tmpfiles.d/${app}.conf"
+ynh_config_add --template="diaspora.tmpfiles.d" --destination="/etc/tmpfiles.d/${app}.conf"
 systemd-tmpfiles --create
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting $app's systemd service..." --weight=1
+ynh_script_progression "Starting $app's systemd service..."
 
 systemctl restart "${app}.target"
-ynh_systemd_action --service_name="${app}_web.service" --action=restart --log_path="$install_dir/live/log/production.log" --line_match="successfully configured the federation library"
-ynh_systemd_action --service_name="${app}_sidekiq.service" --action=restart --log_path="systemd" --line_match="Running in ruby"
+ynh_systemctl --service="${app}_web.service" --action=restart --log_path="$install_dir/live/log/production.log" --wait_until="successfully configured the federation library"
+ynh_systemctl --service="${app}_sidekiq.service" --action=restart --log_path="systemd" --wait_until="Running in ruby"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Installation of $app completed" --last
+ynh_script_progression "Installation of $app completed"

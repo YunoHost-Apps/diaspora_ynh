@@ -1,9 +1,5 @@
 #!/bin/bash
 
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
@@ -16,38 +12,36 @@ admin_mail=$(ynh_user_get_info --username=$admin --key=mail)
 #=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Stopping $app's systemd service..." --weight=1
+ynh_script_progression "Stopping $app's systemd service..."
 
-ynh_systemd_action --service_name="$app.target" --action="stop" --log_path="/var/log/$app/$app.log"
+ynh_systemctl --service="$app.target" --action="stop"
 
 #=================================================
 # MODIFY URL IN NGINX CONF
 #=================================================
-ynh_script_progression --message="Updating NGINX web server configuration..." --weight=1
+ynh_script_progression "Updating NGINX web server configuration..."
 
-# this will most likely adjust NGINX config correctly
-ynh_change_url_nginx_config
+
+ynh_config_change_url_nginx
 
 #=================================================
 # UPDATE A CONFIG FILE
 #=================================================
-ynh_script_progression --message="Updating a configuration file..." --weight=1
+ynh_script_progression "Updating configuration..."
 
-ynh_add_config --template="diaspora.toml" --destination="$install_dir/live/config/diaspora.toml"
-chmod 400 "$install_dir/live/config/diaspora.toml"
-chown "$app:$app" "$install_dir/live/config/diaspora.toml"
+ynh_config_add --template="diaspora.toml" --destination="$install_dir/live/config/diaspora.toml"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting $app's systemd service..." --weight=1
+ynh_script_progression "Starting $app's systemd service..."
 
 systemctl restart "${app}.target"
-ynh_systemd_action --service_name="${app}_web.service" --action=restart --log_path="$install_dir/live/log/production.log" --line_match="successfully configured the federation library"
-ynh_systemd_action --service_name="${app}_sidekiq.service" --action=restart --log_path="systemd" --line_match="Running in ruby"
+ynh_systemctl --service="${app}_web.service" --action=restart --log_path="$install_dir/live/log/production.log" --wait_until="successfully configured the federation library"
+ynh_systemctl --service="${app}_sidekiq.service" --action=restart --log_path="systemd" --wait_until="Running in ruby"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Change of URL completed for $app" --last
+ynh_script_progression "Change of URL completed for $app"

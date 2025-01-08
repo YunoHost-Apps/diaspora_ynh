@@ -19,7 +19,8 @@ userdoc = "https://wiki.diasporafoundation.org/FAQ_for_users"
 code = "https://github.com/diaspora/diaspora"
 
 [integration]
-yunohost = ">=11.2.12"
+yunohost = ">=11.2.30"
+helpers_version = "2.1"
 architectures = "all"
 multi_instance = true
 ldap = false
@@ -56,6 +57,7 @@ ram.runtime = "2000M"
     allow_email = true
 
     [resources.install_dir]
+    group = "www-data:r-x"
 
     [resources.permissions]
     main.url = "/"
