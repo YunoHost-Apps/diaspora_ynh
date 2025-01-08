@@ -4,7 +4,7 @@
 # COMMON VARIABLES
 #=================================================
 
-ruby_version=2.7
+ruby_version=3.3.3
 nodejs_version=14
 bundler_version=2.1.4
 

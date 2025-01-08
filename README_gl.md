@@ -5,7 +5,7 @@ NON debe editarse manualmente.
 
 # Diaspora para YunoHost
 
-[![Nivel de integración](https://dash.yunohost.org/integration/diaspora.svg)](https://dash.yunohost.org/appci/app/diaspora) ![Estado de funcionamento](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Estado de mantemento](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
+[![Nivel de integración](https://dash.yunohost.org/integration/diaspora.svg)](https://ci-apps.yunohost.org/ci/apps/diaspora/) ![Estado de funcionamento](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Estado de mantemento](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
 
 [![Instalar Diaspora con YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=diaspora)
 
@@ -18,7 +18,7 @@ NON debe editarse manualmente.
 
 
 
-**Versión proporcionada:** 0.7.18.2~ynh3
+**Versión proporcionada:** 0.9.0.0~ynh1
 
 ## Capturas de pantalla
 

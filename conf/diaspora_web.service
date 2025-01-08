@@ -1,5 +1,5 @@
 [Unit]
-Description=Diaspora social network (unicorn - instance __APP__)
+Description=Diaspora social network (puma - instance __APP__)
 PartOf=__APP__.target
 
 [Service]
@@ -10,8 +10,9 @@ Environment="__LD_PRELOAD__"
 Environment="RAILS_ENV=production"
 Environment="__YNH_RUBY_LOAD_PATH__"
 PIDFile=/run/__APP__/diaspora.pid
-ExecStart=__INSTALL_DIR__/live/bin/bundle exec unicorn -c config/unicorn.rb -E production
-ExecReload=/bin/kill -USR2 $MAINPID
+ExecStart=__INSTALL_DIR__/live/bin/bundle exec puma -C config/puma.rb
+ExecReload=__INSTALL_DIR__/live/bin/pumactl -F config/puma.rb restart
+ExecStop=__INSTALL_DIR__/live/bin/pumactl -F config/puma.rb stop
 Restart=always
 
 # Sandboxing options to harden security

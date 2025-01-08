@@ -7,7 +7,7 @@ name = "Diaspora"
 description.en = "Distributed social networking service"
 description.fr = "Service de réseau social distribué"
 
-version = "0.7.18.2~ynh3"
+version = "0.9.0.0~ynh1"
 
 maintainers = ["autra"]
 
@@ -47,8 +47,8 @@ ram.runtime = "2000M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/diaspora/diaspora/archive/refs/tags/v0.7.18.2.tar.gz"
-    sha256 = "0b5828aa45af2361bfda4cd0f1e97070c322d90f1d16416bae2cba2418af9930"
+    url = "https://github.com/diaspora/diaspora/archive/refs/tags/v0.9.0.0.tar.gz"
+    sha256 = "11c79d8cc86412f0a94de62f5a8cc115428d978333c6129c96bbf44f39adc31d"
 
     autoupdate.strategy = "latest_github_release"
 
@@ -62,15 +62,24 @@ ram.runtime = "2000M"
 
     [resources.apt]
     packages = [
-        "cmake",
-        "imagemagick",
-        "ghostscript",
+        "build-essential",
         "curl",
+        "gsfonts",
+        "imagemagick",
         "libmagickwand-dev",
-        "git",
-        "libpq-dev",
         "redis-server",
+        "libssl-dev",
+        "libcurl4-openssl-dev",
+        "libxml2-dev",
+        "libxslt1-dev",
+        "libidn11-dev",
+        "libpq-dev",
+
         "postgresql",
+
+        # Is it still required?
+        "cmake",
+        "ghostscript",
         "libffi-dev",
         "libgdbm-dev",
         "libncurses5-dev",
@@ -78,22 +87,22 @@ ram.runtime = "2000M"
         "pkg-config",
         "sqlite3",
         "libgmp-dev",
-        "libssl-dev",
         # For Ruby
         "libjemalloc-dev",
-        "curl",
-        "build-essential",
         "libreadline-dev",
         "zlib1g-dev",
         "libsqlite3-dev",
-        "libssl-dev",
-        "libxml2-dev",
         "libxslt-dev",
         "autoconf",
         "automake",
         "bison",
         "libtool",
     ]
+
+    [resources.apt.extras.yarn]
+    repo = "deb https://dl.yarnpkg.com/debian/ stable main"
+    key = "https://dl.yarnpkg.com/debian/pubkey.gpg"
+    packages = ["yarn"]
 
     [resources.database]
     type = "postgresql"
