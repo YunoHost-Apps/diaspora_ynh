@@ -5,7 +5,9 @@ EZ editatu eskuz.
 
 # Diaspora YunoHost-erako
 
-[![Integrazio maila](https://dash.yunohost.org/integration/diaspora.svg)](https://ci-apps.yunohost.org/ci/apps/diaspora/) ![Funtzionamendu egoera](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Mantentze egoera](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
+[![Integrazio maila](https://apps.yunohost.org/badge/integration/diaspora)](https://ci-apps.yunohost.org/ci/apps/diaspora/)
+![Funtzionamendu egoera](https://apps.yunohost.org/badge/state/diaspora)
+![Mantentze egoera](https://apps.yunohost.org/badge/maintained/diaspora)
 
 [![Instalatu Diaspora YunoHost-ekin](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=diaspora)
 
@@ -16,9 +18,10 @@ EZ editatu eskuz.
 
 ## Aurreikuspena
 
+A privacy-aware, distributed, open source social network
 
 
-**Paketatutako bertsioa:** 0.9.0.0~ynh1
+**Paketatutako bertsioa:** 0.9.0.0~ynh2
 
 ## Pantaila-argazkiak
 
@@ -37,7 +40,7 @@ EZ editatu eskuz.
 
 Bidali `pull request`a [`testing` abarrera](https://github.com/YunoHost-Apps/diaspora_ynh/tree/testing).
 
-`testing` abarra probatzeko, ondorengoa egin:
+`testing` abarra probatzeko, honakoa egin:
 
 ```bash
 sudo yunohost app install https://github.com/YunoHost-Apps/diaspora_ynh/tree/testing --debug
