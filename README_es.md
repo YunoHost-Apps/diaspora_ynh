@@ -3,9 +3,11 @@ Este archivo README esta generado automaticamente<https://github.com/YunoHost/ap
 No se debe editar a mano.
 -->
 
-# Diaspora para Yunohost
+# Diaspora para YunoHost
 
-[![Nivel de integración](https://dash.yunohost.org/integration/diaspora.svg)](https://ci-apps.yunohost.org/ci/apps/diaspora/) ![Estado funcional](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Estado En Mantención](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
+[![Nivel de integración](https://apps.yunohost.org/badge/integration/diaspora)](https://ci-apps.yunohost.org/ci/apps/diaspora/)
+![Estado funcional](https://apps.yunohost.org/badge/state/diaspora)
+![Estado En Mantención](https://apps.yunohost.org/badge/maintained/diaspora)
 
 [![Instalar Diaspora con Yunhost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=diaspora)
 
@@ -16,9 +18,10 @@ No se debe editar a mano.
 
 ## Descripción general
 
+A privacy-aware, distributed, open source social network
 
 
-**Versión actual:** 0.9.0.0~ynh1
+**Versión actual:** 0.9.0.0~ynh2
 
 ## Capturas
 
@@ -35,7 +38,7 @@ No se debe editar a mano.
 
 ## Información para desarrolladores
 
-Por favor enviar sus correcciones a la [`branch testing`](https://github.com/YunoHost-Apps/diaspora_ynh/tree/testing
+Por favor enviar sus correcciones a la [rama `testing`](https://github.com/YunoHost-Apps/diaspora_ynh/tree/testing).
 
 Para probar la rama `testing`, sigue asÍ:
 

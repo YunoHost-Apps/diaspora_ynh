@@ -5,7 +5,9 @@ NON debe editarse manualmente.
 
 # Diaspora para YunoHost
 
-[![Nivel de integración](https://dash.yunohost.org/integration/diaspora.svg)](https://ci-apps.yunohost.org/ci/apps/diaspora/) ![Estado de funcionamento](https://ci-apps.yunohost.org/ci/badges/diaspora.status.svg) ![Estado de mantemento](https://ci-apps.yunohost.org/ci/badges/diaspora.maintain.svg)
+[![Nivel de integración](https://apps.yunohost.org/badge/integration/diaspora)](https://ci-apps.yunohost.org/ci/apps/diaspora/)
+![Estado de funcionamento](https://apps.yunohost.org/badge/state/diaspora)
+![Estado de mantemento](https://apps.yunohost.org/badge/maintained/diaspora)
 
 [![Instalar Diaspora con YunoHost](https://install-app.yunohost.org/install-with-yunohost.svg)](https://install-app.yunohost.org/?app=diaspora)
 
@@ -16,9 +18,10 @@ NON debe editarse manualmente.
 
 ## Vista xeral
 
+A privacy-aware, distributed, open source social network
 
 
-**Versión proporcionada:** 0.9.0.0~ynh1
+**Versión proporcionada:** 0.9.0.0~ynh2
 
 ## Capturas de pantalla
 
