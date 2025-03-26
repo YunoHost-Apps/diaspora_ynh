@@ -1,17 +1,20 @@
 #!/bin/bash
 
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
 source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# REMOVE SYSTEM CONFIGURATIONS
+# REMOVE SYSTEM CONFIGURATION
 #=================================================
 ynh_script_progression "Removing system configurations related to $app..."
 
 if ynh_hide_warnings yunohost service status "$app.target" >/dev/null; then
-    yunohost service remove "$app.target"
+	yunohost service remove "$app.target"
 fi
-
 ynh_config_remove_systemd
 
 ynh_safe_rm "/etc/tmpfiles.d/${app}.conf"
@@ -26,9 +29,9 @@ ynh_config_remove_nginx
 #=================================================
 ynh_script_progression "Removing dependencies..."
 
-ynh_ruby_remove
+#ynh_ruby_remove
 
-ynh_nodejs_remove
+#ynh_nodejs_remove
 
 #=================================================
 # END OF SCRIPT

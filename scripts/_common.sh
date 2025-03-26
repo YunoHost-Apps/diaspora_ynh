@@ -4,9 +4,8 @@
 # COMMON VARIABLES AND CUSTOM HELPERS
 #=================================================
 
-ruby_version=3.3.3
-nodejs_version=14
-bundler_version=2.1.4
+ruby_version="3.3"
+nodejs_version="14"
 
 # jemalloc seems to be better for ROR apps, let's use it
 case $YNH_ARCH in

@@ -1,7 +1,19 @@
 #!/bin/bash
 
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
+
+# Keep this path for calling _common.sh inside the execution's context of backup and restore scripts
 source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
+
+#=================================================
+# RESTORE THE APP MAIN DIR
+#=================================================
+ynh_script_progression "Restoring the app main directory..."
+
+ynh_restore "$install_dir"
 
 #=================================================
 # REINSTALL DEPENDENCIES
@@ -13,13 +25,6 @@ ynh_ruby_install
 ynh_nodejs_install
 
 #=================================================
-# RESTORE THE APP MAIN DIR
-#=================================================
-ynh_script_progression "Restoring the app main directory..."
-
-ynh_restore "$install_dir"
-
-#=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
 ynh_script_progression "Restoring the PostgreSQL database..."
@@ -27,17 +32,7 @@ ynh_script_progression "Restoring the PostgreSQL database..."
 ynh_psql_db_shell < ./db.sql
 
 #=================================================
-# BUILD APP
-#=================================================
-ynh_script_progression "Building app..."
-
-pushd "$install_dir/live"
-  gem install "bundler:$bundler_version"
-  ynh_exec_as_app "$ld_preload" script/configure_bundler
-popd
-
-#=================================================
-# RESTORE SYSTEM CONFIGURATIONS
+# RESTORE SYSTEM CONFIGURATION
 #=================================================
 ynh_script_progression "Restoring system configurations related to $app..."
 
@@ -48,13 +43,23 @@ ynh_restore "/etc/systemd/system/${app}_sidekiq.service"
 ynh_restore "/etc/systemd/system/${app}.target"
 systemctl enable "${app}_web" "${app}_sidekiq" "$app.target" --quiet
 yunohost service add "$app.target" --description "Diaspora service (web and sidekiq)" \
-  --log "$install_dir/live/log/production.log" \
-        "$install_dir/live/log/web-stderr.log" \
-        "$install_dir/live/log/web-stdout.log" \
-        "$install_dir/live/log/sidekiq.log"
+	--log "$install_dir/live/log/production.log" \
+				"$install_dir/live/log/web-stderr.log" \
+				"$install_dir/live/log/web-stdout.log" \
+				"$install_dir/live/log/sidekiq.log"
 
 ynh_restore "/etc/tmpfiles.d/${app}.conf"
 systemd-tmpfiles --create
+
+#=================================================
+# BUILD APP
+#=================================================
+ynh_script_progression "Building app..."
+
+pushd "$install_dir/live"
+	env PATH="$path_with_ruby" gem install bundler --conservative -v $(awk '/BUNDLED WITH/ { getline; gsub(/ /,""); print $0 }' $install_dir/Gemfile.lock)
+	ynh_exec_as_app "$ld_preload" script/configure_bundler
+popd
 
 #=================================================
 # RELOAD NGINX AND PHP-FPM OR THE APP SERVICE
