@@ -63,12 +63,7 @@ fi
 
 ynh_safe_rm "$install_dir/Experimental_helpers"
 
-# FIXMEhelpers2.1: maybe replace with: ynh_app_setting_set_default --key=admin --value=""
-if [[ -z "${admin:-}" ]]; then
-	admin=""
-	ynh_app_setting_set --key=admin --value="$admin"
-fi
-
+ynh_app_setting_set_default --key=admin --value=""
 admin_mail=$(ynh_user_get_info --username="$admin" --key=mail)
 
 #=================================================
