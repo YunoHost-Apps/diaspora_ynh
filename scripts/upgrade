@@ -126,7 +126,7 @@ systemd-tmpfiles --create
 ynh_script_progression "Building app..."
 
 pushd "$install_dir/live"
-	env PATH="$path_with_ruby" gem install bundler --conservative -v $(awk '/BUNDLED WITH/ { getline; gsub(/ /,""); print $0 }' $install_dir/live/Gemfile.lock)
+  ynh_gem install "bundler:$bundler_version"
 	ynh_hide_warnings ynh_exec_as_app "$ld_preload" script/configure_bundler
 	ynh_hide_warnings ynh_exec_as_app "$ld_preload" bin/bundle install --full-index --with=postgresql
 	ynh_hide_warnings ynh_exec_as_app RAILS_ENV=production "$ld_preload" bin/bundle exec rake db:migrate
