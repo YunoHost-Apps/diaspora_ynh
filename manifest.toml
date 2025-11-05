@@ -7,7 +7,7 @@ name = "Diaspora"
 description.en = "Distributed social networking service"
 description.fr = "Service de réseau social distribué"
 
-version = "0.9.0.0~ynh2"
+version = "0.9.0.0~ynh3"
 
 maintainers = ["autra"]
 
@@ -19,11 +19,14 @@ userdoc = "https://wiki.diasporafoundation.org/FAQ_for_users"
 code = "https://github.com/diaspora/diaspora"
 
 [integration]
-yunohost = ">=11.2.12"
+yunohost = ">=12.0.9"
+helpers_version = "2.1"
 architectures = "all"
 multi_instance = true
+
 ldap = false
 sso = false
+
 disk = "500M"
 ram.build = "2000M"
 ram.runtime = "2000M"
