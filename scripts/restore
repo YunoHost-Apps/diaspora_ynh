@@ -57,7 +57,7 @@ systemd-tmpfiles --create
 ynh_script_progression "Building app..."
 
 pushd "$install_dir/live"
-  ynh_gem install "bundler:$bundler_version"
+    ynh_exec_as_app "$ld_preload" gem install bundler --conservative -v $(awk '/BUNDLED WITH/ { getline; gsub(/ /,""); print $0 }' $install_dir/live/Gemfile.lock)
 	ynh_exec_as_app "$ld_preload" script/configure_bundler
 popd
 
