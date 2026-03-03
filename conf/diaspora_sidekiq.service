@@ -9,6 +9,7 @@ WorkingDirectory=__INSTALL_DIR__/live
 Environment="__LD_PRELOAD__"
 Environment="RAILS_ENV=production"
 Environment="PATH=__PATH_WITH_RUBY__"
+Environment="PATH=__PATH_WITH_NODEJS__"
 ExecStart=__INSTALL_DIR__/live/bin/bundle exec sidekiq
 Restart=always
 
