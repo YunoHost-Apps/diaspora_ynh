@@ -16,15 +16,6 @@ ynh_script_progression "Restoring the app main directory..."
 ynh_restore "$install_dir"
 
 #=================================================
-# REINSTALL DEPENDENCIES
-#=================================================
-ynh_script_progression "Reinstalling dependencies..."
-
-ynh_ruby_install
-
-ynh_nodejs_install
-
-#=================================================
 # RESTORE THE POSTGRESQL DATABASE
 #=================================================
 ynh_script_progression "Restoring the PostgreSQL database..."
@@ -57,7 +48,7 @@ systemd-tmpfiles --create
 ynh_script_progression "Building app..."
 
 pushd "$install_dir/live"
-	env PATH="$path_with_ruby" gem install bundler --conservative -v $(awk '/BUNDLED WITH/ { getline; gsub(/ /,""); print $0 }' $install_dir/live/Gemfile.lock)
+    ynh_exec_as_app "$ld_preload" gem install bundler --conservative -v $(awk '/BUNDLED WITH/ { getline; gsub(/ /,""); print $0 }' $install_dir/live/Gemfile.lock)
 	ynh_exec_as_app "$ld_preload" script/configure_bundler
 popd
 
