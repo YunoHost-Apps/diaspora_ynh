@@ -7,7 +7,7 @@ name = "Diaspora"
 description.en = "Distributed social networking service"
 description.fr = "Service de réseau social distribué"
 
-version = "0.9.1.0~ynh1"
+version = "0.10.0~ynh1"
 
 maintainers = []
 
@@ -50,8 +50,8 @@ ram.runtime = "2000M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/diaspora/diaspora/archive/refs/tags/v0.9.1.0.tar.gz"
-    sha256 = "92f8e5ebcb64e893c274f2b975b7b3bd87d5d492806615734fbb564a060847ba"
+    url = "https://github.com/diaspora/diaspora/archive/refs/tags/v0.10.0.tar.gz"
+    sha256 = "661c35ccd43e29391f02aadb8377a1f5bc29a4414a80a24009604c9f19787599"
 
     autoupdate.strategy = "latest_github_release"
 
