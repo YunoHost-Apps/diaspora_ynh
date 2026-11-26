@@ -25,15 +25,6 @@ _ynh_remove_systemd_target
 ynh_config_remove_nginx
 
 #=================================================
-# REMOVE DEPENDENCIES
-#=================================================
-ynh_script_progression "Removing dependencies..."
-
-#ynh_ruby_remove
-
-#ynh_nodejs_remove
-
-#=================================================
 # END OF SCRIPT
 #=================================================
 

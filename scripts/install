@@ -37,15 +37,6 @@ ynh_config_add --template="diaspora.toml" --destination="$install_dir/live/confi
 ynh_config_add --template="database.yml" --destination="$install_dir/live/config/database.yml"
 
 #=================================================
-# INSTALL DEPENDENCIES
-#=================================================
-ynh_script_progression "Installing dependencies..."
-
-ynh_ruby_install
-
-ynh_nodejs_install
-
-#=================================================
 # SYSTEM CONFIGURATION
 #=================================================
 ynh_script_progression "Adding system configurations related to $app..."
