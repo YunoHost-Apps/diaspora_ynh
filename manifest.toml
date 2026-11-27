@@ -7,7 +7,7 @@ name = "Diaspora"
 description.en = "Distributed social networking service"
 description.fr = "Service de réseau social distribué"
 
-version = "0.9.1.0~ynh1"
+version = "0.10.1~ynh1"
 
 maintainers = []
 
@@ -50,8 +50,8 @@ ram.runtime = "2000M"
 
 [resources]
     [resources.sources.main]
-    url = "https://github.com/diaspora/diaspora/archive/refs/tags/v0.9.1.0.tar.gz"
-    sha256 = "92f8e5ebcb64e893c274f2b975b7b3bd87d5d492806615734fbb564a060847ba"
+    url = "https://github.com/diaspora/diaspora/archive/refs/tags/v0.10.1.tar.gz"
+    sha256 = "aba3f313af277eb22686e195211de821cbbabfad0bfd65e0863d4a1e72a7a66b"
 
     autoupdate.strategy = "latest_github_release"
 
@@ -104,3 +104,9 @@ ram.runtime = "2000M"
 
     [resources.database]
     type = "postgresql"
+
+    [resources.nodejs]
+    version = "24"
+
+    [resources.ruby]
+    version = "3.3"
